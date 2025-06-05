@@ -1,0 +1,9 @@
+# 環境・キャッシュ系を無視
+ColorConstancy_env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.ipynb_checkpoints/
+.DS_Store
+.env
