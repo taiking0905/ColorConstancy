@@ -1,4 +1,4 @@
-# Canon Dataset Preprocessing & Histogram Project
+# Dataset Preprocessing & Histogram Project
 
 本プロジェクトは、Canon 568データセットに対するマスク処理とヒストグラム抽出、および機械学習を行うためのPython環境です。
 
