@@ -22,15 +22,22 @@ pip install -r requirements.txt
 ```bash
 .\ColorConstancy_env\Scripts\Activate   
 
-jupyter lab 
-
 ```
 
 ```bash
 
 project_root/
-├── src/            # Jupyter作業ファイル
-├── cc_env/               # 仮想環境（この中はGit管理しない）
+├── src/            # Vscode作業ファイル
+├── ColorConstancy_env/               # 仮想環境（この中はGit管理しない）
 ├── requirements.txt      # 使用ライブラリ一覧
 └── README.md             # このファイル
+````
+
+```bash
+
+USB/ColorConstancy
+├── /datasets 
+├── /histogram       
+├── /
+└── 
 ````
