@@ -41,6 +41,14 @@ def setup_directories():
 # グローバルフラグ
 action = {"next": False, "quit": False} # enterで次へ進むためのフラグ,qでプログラムを終了するためのフラグ
 
+# ウィンドウを左端・右端に配置する関数
+def move_figure(fig, x, y):
+    backend = plt.get_backend()
+    if backend == 'TkAgg':
+        fig.canvas.manager.window.wm_geometry(f"+{x}+{y}")
+    else:
+        print(f"ウィンドウ移動はこのバックエンドでは未対応: {backend}")
+
 # マスク処理を行う関数
 def MaskProcessing(image_path, output_path):
     global action
@@ -67,6 +75,8 @@ def MaskProcessing(image_path, output_path):
         masked_img = cv2.bitwise_and(img_scaled, mask)
         cv2.imwrite(output_path, masked_img)
         print(f"Saved masked image to: {output_path}")
+        fig, ax = plt.subplots(figsize=(10, 9)) 
+        move_figure(fig, 0, 0) 
         ax.imshow(cv2.cvtColor(masked_img, cv2.COLOR_BGR2RGB))
         ax.set_title("Press Enter to continue or q to quit")
         fig.canvas.draw()
@@ -98,7 +108,8 @@ def MaskProcessing(image_path, output_path):
             action["quit"] = True
             plt.close()
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 9)) 
+    move_figure(fig, 0, 0) 
     ax.imshow(img_rgb_display)
     ax.set_title("Click 4 points (Press 'r' to reset)")
     fig.canvas.mpl_connect("button_press_event", onclick)
@@ -162,13 +173,6 @@ def CreateHistogram(image_path, output_path):
     # ======================
     # 共通イベントハンドラで同時に閉じる
     # ======================
-    # ウィンドウを左端・右端に配置する関数
-    def move_figure(fig, x, y):
-        backend = plt.get_backend()
-        if backend == 'TkAgg':
-            fig.canvas.manager.window.wm_geometry(f"+{x}+{y}")
-        else:
-            print(f"ウィンドウ移動はこのバックエンドでは未対応: {backend}")
 
     # 左端・右端に配置（モニタサイズに応じて調整）
     move_figure(fig1, 0, 100)        # 左端（x=0, y=100）
@@ -239,6 +243,8 @@ def TeacherProcessing(filename, real_rgb_json, image_path, output_path):
     print(f"Corrected image saved to: {output_path}")
     
     # 表示（matplotlib）→ Enter 押しで閉じる
+    fig, ax = plt.subplots(figsize=(12, 9)) 
+    move_figure(fig, 0, 0) 
     plt.imshow(cv2.cvtColor(img_to_save, cv2.COLOR_BGR2RGB))
     plt.title("Corrected Image - Press Enter to close")
     plt.axis("off")
@@ -280,7 +286,7 @@ def pretreatment():
             CreateHistogram(image_masked_path, dirs["hist"])
 
             # filename + ".png"= real_rgb_jsonの時のデータと image_masked_path(マスク処理された画像)を使い,結果はヒストグラム(CSV)を作成,teacherhistディレクトリに保存
-            TeacherProcessing(filename, dirs["real_rgb_json"], image_masked_path, image_corrected_path)
+            TeacherProcessing(filename , dirs["real_rgb_json"], image_masked_path, image_corrected_path)
 
             #image_corrected_path(マスク処理された教師データの画像)を使い,ヒストグラム(CSV)を作成,teacherhistディレクトリに保存
             CreateHistogram(image_corrected_path, dirs["teacher_hist"])        
