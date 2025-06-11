@@ -186,12 +186,23 @@ def CreateHistogram(image_path, output_path):
     plt.show(block=False)
     plt.show()
 
-    # presence_mask を CSV 保存
-    pd.DataFrame(presence_mask.astype(int)).to_csv(
-        os.path.join(output_path, f"{filename}.csv"), index=False
+    # presence_mask を flatten して1250次元ベクトルとして保存
+    flat_mask = []
+    for i in range(50):
+        for j in range(50):
+            r_val = i * 0.02
+            g_val = j * 0.02
+            if r_val + g_val <= 1.0:
+                flat_mask.append(presence_mask[i, j])
+
+    # numpy配列に変換し、1行のCSVとして保存
+    flat_mask = np.array(flat_mask).astype(int)
+    pd.DataFrame([flat_mask]).to_csv(
+        os.path.join(output_path, f"{filename}.csv"), index=False, header=False
     )
 
-    print(f"Saved histograms for: {filename}")
+    print(f"Saved 1250-dim histogram for: {filename}")
+
     # テスト用正規化できている
     #print(f"{filename}: max(r + g) = {np.max(r_flat + g_flat)}")
 
@@ -269,7 +280,7 @@ def pretreatment():
             CreateHistogram(image_masked_path, dirs["hist"])
 
             # filename + ".png"= real_rgb_jsonの時のデータと image_masked_path(マスク処理された画像)を使い,結果はヒストグラム(CSV)を作成,teacherhistディレクトリに保存
-            TeacherProcessing(filename + ".png", dirs["real_rgb_json"], image_masked_path, image_corrected_path)
+            TeacherProcessing(filename, dirs["real_rgb_json"], image_masked_path, image_corrected_path)
 
             #image_corrected_path(マスク処理された教師データの画像)を使い,ヒストグラム(CSV)を作成,teacherhistディレクトリに保存
             CreateHistogram(image_corrected_path, dirs["teacher_hist"])        
