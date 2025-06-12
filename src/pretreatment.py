@@ -75,8 +75,6 @@ def MaskProcessing(image_path, output_path):
         masked_img = cv2.bitwise_and(img_scaled, mask)
         cv2.imwrite(output_path, masked_img)
         print(f"Saved masked image to: {output_path}")
-        fig, ax = plt.subplots(figsize=(10, 9)) 
-        move_figure(fig, 0, 0) 
         ax.imshow(cv2.cvtColor(masked_img, cv2.COLOR_BGR2RGB))
         ax.set_title("Press Enter to continue or q to quit")
         fig.canvas.draw()
