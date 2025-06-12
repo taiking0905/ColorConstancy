@@ -8,3 +8,4 @@ tqdm
 jupyter
 pyqt5
 torch
+rawpy
