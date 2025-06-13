@@ -1,6 +1,6 @@
-# Dataset Preprocessing & Histogram Project
+# Color Constancy
 
-本プロジェクトは、Canon 568データセットに対するマスク処理とヒストグラム抽出、および機械学習を行うためのPython環境です。
+本プロジェクトは、機械学習をして色恒常性を手に入れる研究です。
 
 ---
 
@@ -27,9 +27,21 @@ pip install -r requirements.txt
 ```bash
 
 project_root/
-├── src/            # Vscode作業ファイル
-├── ColorConstancy_env/               # 仮想環境（この中はGit管理しない）
+├── datapre               # 試し実行用データ
+├── src/                  # Vscode作業ファイル
+├──├──LCC-v0/
+├──├── config.py          # 訓練やモデルのハイパーパラメータ設定
+├──├── load_dataset.py    # データセットの読み込みロジック
+├──├── MLPModel.py        # MLPモデルの定義
+├──├── train.py           # 学習スクリプト
+├──├── test.py            # テストスクリプト
+├──├── outputs/           # 学習モデル・ログの保存先
+├──└── __pycache__/       # Pythonのキャッシュ（Git管理不要）
+|
+├──├──pretreatment.py     #前処理
+├── ColorConstancy_env/   # 仮想環境（この中はGit管理しない）
 ├── requirements.txt      # 使用ライブラリ一覧
+├── real_rgb.json         # 教師データ
 └── README.md             # このファイル
 ````
 
