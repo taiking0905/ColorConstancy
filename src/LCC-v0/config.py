@@ -8,10 +8,11 @@ import random
 # パス設定
 # -------------------------------
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 LCC_DIR = Path(__file__).resolve().parent
 HISTPRE_DIR = BASE_DIR / "histpre"
-real_rgb_json_path = BASE_DIR / "real_rgb.json"
+REAL_RGB_JSON_PATH = BASE_DIR / "real_rgb.json"
 TEST_HIST_DIR = BASE_DIR / "testpre"
 OUTPUT_DIR = LCC_DIR / "outputs"
 # -------------------------------
