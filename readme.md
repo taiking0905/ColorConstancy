@@ -15,6 +15,7 @@ python -m venv ColorConstancy_env
 
 pip install -r requirements.txt
 
+dir /a-d /b "D:\ColorConstancy\histogram" | find /c /v ""
 ```
 
 ### 2.仮想環境起動方法
@@ -50,6 +51,6 @@ project_root/
 USB/ColorConstancy
 ├── /datasets 
 ├── /histogram       
-├── /
+├── /enddatasets
 └── 
 ````
