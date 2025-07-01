@@ -1,13 +1,13 @@
-import matplotlib
 import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 import os
 import pandas as pd
+from matplotlib.colors import LogNorm
 
 from config import move_figure
 
-# ヒストグラムを作成し、表示する関数
+# ヒストグラムを作成し表示する関数
 def CreateHistogram(image_path, output_path):
     bin_width = 0.02
     num_bins = int(1.0 / bin_width)
@@ -27,15 +27,17 @@ def CreateHistogram(image_path, output_path):
     norm_display = display_img.astype('float32') / 255.0
 
     fig1 = plt.figure(figsize=(10, 4))
+    ax1 = fig1.add_subplot(1, 1, 1)
     for i, color in enumerate(('r', 'g', 'b')):
         hist = cv2.calcHist([norm_display], [i], mask, [256], [0, 1])
-        plt.plot(hist, color=color, label=f"{color.upper()} channel")
-    plt.title(f"RGB Histogram: {filename}")
-    plt.xlabel("Intensity")
-    plt.ylabel("Pixel Count")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
+        ax1.plot(hist, color=color, label=f"{color.upper()} channel")
+    ax1.set_title(f"RGB Histogram: {filename}")
+    ax1.set_xlabel("Intensity")
+    ax1.set_ylabel("Pixel Count")
+    ax1.legend()
+    ax1.grid(True)
+    fig1.tight_layout()
+
 
     # ======================
     # 2D ヒストグラム（rg空間）
@@ -57,14 +59,14 @@ def CreateHistogram(image_path, output_path):
     presence_mask = binary_hist_2d > 0
 
     fig2 = plt.figure(figsize=(6, 6))
-    plt.imshow(presence_mask.T, origin='lower', cmap='gray',
-            extent=[0, 1, 0, 1], aspect='auto')
-    plt.colorbar(label='Pixel Exists (True/False)')
-    plt.xlabel('r = R / (R+G+B)')
-    plt.ylabel('g = G / (R+G+B)')
-    plt.title(f"2D Hist (rg mask): {filename}")
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+    ax2 = fig2.add_subplot(1, 1, 1)
+    im2 = ax2.imshow(presence_mask.T, origin='lower', cmap='gray',
+                    extent=[0, 1, 0, 1], aspect='auto')
+    ax2.set_title(f"2D Hist (rg mask): {filename}")
+    ax2.set_xlabel('r = R / (R+G+B)')
+    ax2.set_ylabel('g = G / (R+G+B)')
+    ax2.grid(True, alpha=0.3)
+    fig2.colorbar(im2, ax=ax2, label='Pixel Exists (True/False)')
 
     # ======================
     # 共通イベントハンドラで同時に閉じる
@@ -83,14 +85,13 @@ def CreateHistogram(image_path, output_path):
     fig1.canvas.mpl_connect("key_press_event", on_key)
     fig2.canvas.mpl_connect("key_press_event", on_key)
 
-    plt.show(block=False)
-    plt.show()
+    plt.show(block=True )
 
     # presence_mask を flatten して1250次元ベクトルとして保存
     flat_mask = []
     for g in range(50):  # y軸（行）
         for r in range(50):  # x軸（列）
-            if (r * 0.02 + g * 0.02) <= 1.0:
+            if (r * bin_width + g * bin_width) <= 1.0:
                 flat_mask.append(presence_mask[g, r])  # row, col の順
 
     flat_mask = np.array(flat_mask).astype(int)
@@ -101,7 +102,7 @@ def CreateHistogram(image_path, output_path):
 
     print(f"Saved 1250-dim histogram for: {filename}")
 
-def CreateHistogram5(image_path, output_path):
+def CreateHistogram_rg_gb(image_path, output_path):
     bin_width = 0.02
     num_bins = int(1.0 / bin_width)
     filename = os.path.splitext(os.path.basename(image_path))[0]
@@ -120,55 +121,77 @@ def CreateHistogram5(image_path, output_path):
     rgb_ratio = img / sum_rgb
     r_ratio = rgb_ratio[:, :, 2]  # R
     g_ratio = rgb_ratio[:, :, 1]  # G
+    b_ratio = rgb_ratio[:, :, 0]  # B
     valid_mask = black_mask & (sum_rgb[:, :, 0] > 1e-6)
     r_bins = np.clip((r_ratio[valid_mask] / bin_width).astype(int), 0, num_bins - 1)
     g_bins = np.clip((g_ratio[valid_mask] / bin_width).astype(int), 0, num_bins - 1)
+    b_bins = np.clip((b_ratio[valid_mask] / bin_width).astype(int), 0, num_bins - 1)
 
-    binary_hist_2d = np.zeros((num_bins, num_bins), dtype=np.uint8)
+    hist_rg_2d = np.zeros((num_bins, num_bins), dtype=np.uint32)
+    hist_gb_2d = np.zeros((num_bins, num_bins), dtype=np.uint32)
+    
+
     for r_bin, g_bin in zip(r_bins, g_bins):
-        binary_hist_2d[g_bin, r_bin] = 1
+        hist_rg_2d[g_bin, r_bin] += 1
 
-    # 2D ヒストグラムを表示
-    presence_mask = binary_hist_2d > 0
+    for g_bin, b_bin in zip(g_bins, b_bins):
+        hist_gb_2d[g_bin, b_bin] += 1
+
+    # 存在マスク作成
+    presence_mask_rg = hist_rg_2d > 0
+    presence_mask_gb = hist_gb_2d > 0
+
+    fig1 = plt.figure(figsize=(6, 6))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    im1 = ax1.imshow(hist_rg_2d.T, origin='lower', cmap='viridis',
+                    extent=[0, 1, 0, 1], aspect='auto',
+                    norm=LogNorm(vmin=1, vmax=hist_rg_2d.max()))
+    ax1.set_title(f"2D Hist (rg count): {filename}")
+    ax1.set_xlabel('r = R / (R+G+B)')
+    ax1.set_ylabel('g = G / (R+G+B)')
+    ax1.grid(True, alpha=0.3)
+    fig1.colorbar(im1, ax=ax1, label='Pixel Exists')
 
     fig2 = plt.figure(figsize=(6, 6))
-    plt.imshow(presence_mask.T, origin='lower', cmap='gray',
-            extent=[0, 1, 0, 1], aspect='auto')
-    plt.colorbar(label='Pixel Exists (True/False)')
-    plt.xlabel('r = R / (R+G+B)')
-    plt.ylabel('g = G / (R+G+B)')
-    plt.title(f"2D Hist (rg mask): {filename}")
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+    ax2 = fig2.add_subplot(1, 1, 1)
+    im2 = ax2.imshow(hist_gb_2d.T, origin='lower', cmap='viridis',
+                    extent=[0, 1, 0, 1], aspect='auto',
+                    norm=LogNorm(vmin=1, vmax=hist_gb_2d.max()))  # Logスケーリング
+    ax2.set_title(f"2D Hist (gb count): {filename}")
+    ax2.set_xlabel('g = G / (R+G+B)')
+    ax2.set_ylabel('b = B / (R+G+B)')
+    ax2.grid(True, alpha=0.3)
+    fig2.colorbar(im2, ax=ax2, label='Pixel Count (log scale)')
+
 
     # ======================
     # 共通イベントハンドラで同時に閉じる
     # ======================
 
     # 左端・右端に配置（モニタサイズに応じて調整）
+    move_figure(fig1, 0, 100)        # 左端（x=0, y=100）
     move_figure(fig2, 1200, 100)     # 右寄り（x=1200, y=100）※必要に応じて調整
 
     # ========= Enterで同時に閉じる =========
     def on_key(event):
         if event.key == 'enter':
+            plt.close(fig1)
             plt.close(fig2)
 
+    fig1.canvas.mpl_connect("key_press_event", on_key)
     fig2.canvas.mpl_connect("key_press_event", on_key)
 
-    plt.show(block=False)
-    plt.show()
+    plt.show(block=True)
 
-    # presence_mask を flatten して1250次元ベクトルとして保存
-    flat_mask = []
-    for g in range(50):  # y軸（行）
-        for r in range(50):  # x軸（列）
-            if (r * 0.02 + g * 0.02) <= 1.0:
-                flat_mask.append(presence_mask[g, r])  # row, col の順
+    presence_mask_rg = presence_mask_rg.astype(np.float32)
+    presence_mask_gb = presence_mask_gb.astype(np.float32)
 
-    flat_mask = np.array(flat_mask).astype(int)
-    pd.DataFrame([flat_mask]).to_csv(
-        os.path.join(output_path, f"{filename}.csv"), index=False, header=False
-    )
+    upsampled_rg = cv2.resize(presence_mask_rg, (224, 224), interpolation=cv2.INTER_LINEAR)
+    upsampled_gb = cv2.resize(presence_mask_gb, (224, 224), interpolation=cv2.INTER_LINEAR)
 
+    stacked = np.stack([upsampled_rg, upsampled_gb], axis=-1)  # (224, 224, 2)
+
+    np.save(os.path.join(output_path, f"{filename}.npy"), stacked)
+    print(f"Saved upsampled 224x224x2 histogram to: {filename}.npy")
 
     print(f"Saved 1250-dim histogram for: {filename}")

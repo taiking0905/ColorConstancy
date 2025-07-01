@@ -3,7 +3,7 @@ import glob
 import shutil 
 
 from config import setup_directories
-from CreateHistogram import CreateHistogram
+from CreateHistogram import CreateHistogram, CreateHistogram_rg_gb
 from MaskProcessing import MaskProcessing
 from TeacherProcessing import TeacherProcessing
 
@@ -35,7 +35,7 @@ def pretreatment():
     
             # image_masked_path(マスク処理された画像)を使い,ヒストグラム(CSV)を作成,histpreディレクトリに保存
             CreateHistogram(image_masked_path, dirs["HIST"])
-            CreateHistogram5(image_masked_path, dirs["HIST"])
+            CreateHistogram_rg_gb(image_masked_path, dirs["HIST_RG_GB"])
 
             # filename + ".png"= real_rgb_jsonの時のデータと image_masked_path(マスク処理された画像)を使い,結果はヒストグラム(CSV)を作成,teacherhistディレクトリに保存
             # 教師データの処理を実行、学習に使わないので、ここではコメントアウト

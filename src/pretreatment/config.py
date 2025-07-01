@@ -25,6 +25,7 @@ def setup_directories():
         "INPUT": BASE_PATH / "datasets",
         "MASK": BASE_PATH / "masking",
         "HIST": BASE_PATH / "histogram",
+        "HIST_RG_GB": BASE_PATH / "histogram_rg_gb",
         # "TEACHER": BASE_PATH / "teacher",
         # "TEACHER_HIST": BASE_PATH / "teacherhist",
         "REAL_RGB_JSON": BASE_PATH / "real_rgb.json",
