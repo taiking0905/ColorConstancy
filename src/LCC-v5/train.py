@@ -4,21 +4,21 @@ import matplotlib.pyplot as plt
 
 from load_dataset import load_dataset
 from MLPModel import MLPModel, mse_chromaticity_loss, train_one_epoch, evaluate
-from config import HISTOGRAM_DIR,VAL_HIST_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
+from config import HISTOGRAM_RG_GB_DIR,VAL_HIST_RG_GB_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
 
 def main():
     set_seed() 
     
-
     # 1. データ読み込み
-    X_train_df, y_train_df = load_dataset(HISTOGRAM_DIR, REAL_RGB_JSON_PATH)
-    X_val_df, y_val_df = load_dataset(VAL_HIST_DIR, REAL_RGB_JSON_PATH)
+    X_train, y_train_df = load_dataset(HISTOGRAM_RG_GB_DIR, REAL_RGB_JSON_PATH)
+    X_val, y_val_df = load_dataset(VAL_HIST_RG_GB_DIR, REAL_RGB_JSON_PATH)
+    # 出力がX= numpy Y=df
 
     # 2. Tensorに変換
-    X_train = torch.tensor(X_train_df.values, dtype=torch.float32)
-    y_train = torch.tensor(y_train_df[["r_ratio", "g_ratio"]].values, dtype=torch.float32)
-    X_val = torch.tensor(X_val_df.values, dtype=torch.float32)
-    y_val = torch.tensor(y_val_df[["r_ratio", "g_ratio"]].values, dtype=torch.float32)
+    X_train = torch.tensor(X_train, dtype=torch.float32)
+    y_train = torch.tensor(y_train_df[["R", "G", "B"]].values, dtype=torch.float32)
+    X_val = torch.tensor(X_val, dtype=torch.float32)
+    y_val = torch.tensor(y_val_df[["R", "G", "B"]].values, dtype=torch.float32)
 
 
     # 3. TensorDataset作成

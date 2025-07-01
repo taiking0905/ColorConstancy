@@ -11,8 +11,8 @@ import random
 
 BASE_DIR = Path("D:/ColorConstancy")
 LCC_DIR = Path(__file__).resolve().parent
-HISTOGRAM_DIR = BASE_DIR / "histogram"
-VAL_HIST_DIR = BASE_DIR / "valhist"
+HISTOGRAM_RG_GB_DIR = BASE_DIR / "histogram_rg_gb"
+VAL_HIST_RG_GB_DIR = BASE_DIR / "valhist_rg_gb"
 REAL_RGB_JSON_PATH = BASE_DIR / "real_rgb.json"
 TEST_HIST_DIR = BASE_DIR / "test"
 OUTPUT_DIR = LCC_DIR / "outputs"

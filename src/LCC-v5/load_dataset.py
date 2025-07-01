@@ -1,9 +1,10 @@
 import json
 import os
 import pandas as pd
+import numpy as np
 
 
-def load_dataset(csv_dir, json_path):
+def load_dataset(npy_dir, json_path):
     # 1. JSON読み込みと辞書化
     with open(json_path, 'r') as f:
         json_data = json.load(f)
@@ -14,36 +15,27 @@ def load_dataset(csv_dir, json_path):
     X_list = []
     y_list = []
 
-    for filename in os.listdir(csv_dir):
-        if not filename.endswith("_masked.csv"):
+    for filename in os.listdir(npy_dir):
+        if not filename.endswith("_masked.npy"):
             continue
 
-        base_id = filename.replace("_masked.csv", "")  # 例: 8D5U5524
-
+        base_id = filename.replace("_masked.npy", "")  # 例: 8D5U5524
+        # データと教師データが一致するか
         if base_id not in rgb_dict:
             print(f"Warning: {base_id} not in JSON, skipping")
             continue
-
-        csv_path = os.path.join(csv_dir, filename)
-        df = pd.read_csv(csv_path, header=None)
-
-        # 特徴量は1行と仮定してflatten
-        features = df.values.flatten()
-
-        X_list.append(features)
+        
+        npy_path = os.path.join(npy_dir, filename)
+        arr = np.load(npy_path)
+        X_list.append(arr) # 224 * 224のまま入れる
 
         # real_rgbからr, gの比率を計算
         R, G, B = rgb_dict[base_id]
-        total = R + G + B if R + G + B != 0 else 1e-6  # 0割防止
 
-        r_ratio = R / total
-        g_ratio = G / total
+        y_list.append([R, G, B])
 
-        y_list.append([r_ratio, g_ratio])
-
-    # DataFrameに変換
-    X = pd.DataFrame(X_list)
-    y = pd.DataFrame(y_list, columns=["r_ratio", "g_ratio"])
-
+    # DataFrameに変換 　x=
+    X = np.stack(X_list)
+    y = pd.DataFrame(y_list, columns=["R", "G", "B"])
 
     return X, y
