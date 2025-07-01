@@ -35,6 +35,7 @@ def pretreatment():
     
             # image_masked_path(マスク処理された画像)を使い,ヒストグラム(CSV)を作成,histpreディレクトリに保存
             CreateHistogram(image_masked_path, dirs["HIST"])
+            CreateHistogram5(image_masked_path, dirs["HIST"])
 
             # filename + ".png"= real_rgb_jsonの時のデータと image_masked_path(マスク処理された画像)を使い,結果はヒストグラム(CSV)を作成,teacherhistディレクトリに保存
             # 教師データの処理を実行、学習に使わないので、ここではコメントアウト
@@ -46,9 +47,9 @@ def pretreatment():
 
             # ここで画像を END ディレクトリに移動 本番では使用する
             # 使い終わった画像を END ディレクトリに移動
-            dst_path = os.path.join(dirs["END"], os.path.basename(image_path))
-            shutil.move(image_path, dst_path)
-            print(f"Moved {image_path} → {dst_path}")
+            # dst_path = os.path.join(dirs["END"], os.path.basename(image_path))
+            # shutil.move(image_path, dst_path)
+            # print(f"Moved {image_path} → {dst_path}")
 
         except Exception as e:
             print(f"処理中にエラーが発生しました: {e}")

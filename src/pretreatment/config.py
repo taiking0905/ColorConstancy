@@ -11,7 +11,7 @@ matplotlib.use('TkAgg')  # TkAggバックエンドを使用（ウィンドウ移
 BASE_PATH = Path("D:/ColorConstancy")
 
 # カメラ設定（black/whiteレベル）
-BLACK_LEVEL = 0
+BLACK_LEVEL = 129
 WHITE_LEVEL = 4095
 
 # ======== ディレクトリ構成 ========
