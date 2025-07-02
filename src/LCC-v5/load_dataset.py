@@ -34,8 +34,8 @@ def load_dataset(npy_dir, json_path):
 
         y_list.append([R, G, B])
 
-    # DataFrameに変換 　x=
+    # DataFrameに変換 
     X = np.stack(X_list)
-    y = pd.DataFrame(y_list, columns=["R", "G", "B"])
+    y_df = pd.DataFrame(y_list, columns=["R", "G", "B"])
 
-    return X, y
+    return X, y_df

@@ -3,17 +3,18 @@ from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 
 from load_dataset import load_dataset
-from MLPModel import MLPModel, mse_chromaticity_loss, train_one_epoch, evaluate
+from ResNetModel import ResNetModel, angular_loss, train_one_epoch, evaluate
 from config import HISTOGRAM_RG_GB_DIR,VAL_HIST_RG_GB_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
 
 def main():
     set_seed() 
+
     
     # 1. データ読み込み
     X_train, y_train_df = load_dataset(HISTOGRAM_RG_GB_DIR, REAL_RGB_JSON_PATH)
-    X_val, y_val_df = load_dataset(VAL_HIST_RG_GB_DIR, REAL_RGB_JSON_PATH)
+    X_val, y_val_df = load_dataset(HISTOGRAM_RG_GB_DIR, REAL_RGB_JSON_PATH)
     # 出力がX= numpy Y=df
-
+    
     # 2. Tensorに変換
     X_train = torch.tensor(X_train, dtype=torch.float32)
     y_train = torch.tensor(y_train_df[["R", "G", "B"]].values, dtype=torch.float32)
@@ -30,12 +31,13 @@ def main():
     val_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False)
 
     # 5. モデル定義
-    model = MLPModel(input_dim=X_train.shape[1], hidden_dim=256, output_dim=2)
+    model = ResNetModel(output_dim=3)
     model.to(DEVICE)
-    # SGDオプティマイザで学習
-    optimizer = torch.optim.SGD(model.parameters(), LEARNING_RATE)
-    # 損失関数はクロマティシティ座標のMSE
-    loss_fn = mse_chromaticity_loss
+    # Adamオプティマイザで学習
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+    # 損失関数はRGBベクトル間の角度誤差
+    loss_fn = angular_loss
 
 
     # 学習記録用リスト
@@ -53,7 +55,7 @@ def main():
         val_losses.append(val_loss)
 
     # 7. モデル保存
-    torch.save(model.state_dict(), OUTPUT_DIR / 'mlp_model.pth')
+    torch.save(model.state_dict(), OUTPUT_DIR / 'resnet_model.pth')
 
     # 8. 学習曲線の可視化
     plt.plot(train_losses, label='Train Loss')

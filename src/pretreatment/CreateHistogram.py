@@ -7,12 +7,23 @@ from matplotlib.colors import LogNorm
 
 from config import move_figure
 
-# ヒストグラムを作成し表示する関数
-def CreateHistogram(image_path, output_path):
-    bin_width = 0.02
-    num_bins = int(1.0 / bin_width)
+bin_width = 0.02
+num_bins = int(1.0 / bin_width)
+
+def load_and_normalize_image(image_path):
     filename = os.path.splitext(os.path.basename(image_path))[0]
     img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    black_mask = np.any(img > 0, axis=2)
+    sum_rgb = np.sum(img, axis=2, keepdims=True) + 1e-6
+    rgb_ratio = img / sum_rgb
+    return filename, img, sum_rgb, rgb_ratio, black_mask
+
+
+# ヒストグラムを作成し表示する関数
+def CreateHistogram(image_path, output_path):
+    
+    filename, img, sum_rgb, rgb_ratio, black_mask=load_and_normalize_image(image_path)
+
 
     # # 黒以外の領域をマスク（正規化後の値に対応）
     # mask = cv2.inRange(img, (1e-6, 1e-6, 1e-6), (1.0, 1.0, 1.0))
@@ -42,9 +53,6 @@ def CreateHistogram(image_path, output_path):
     # ======================
     # 2D ヒストグラム（rg空間）
     # ======================
-    black_mask = np.any(img > 0, axis=2)
-    sum_rgb = np.sum(img, axis=2, keepdims=True) + 1e-6
-    rgb_ratio = img / sum_rgb
     r_ratio = rgb_ratio[:, :, 2]  # R
     g_ratio = rgb_ratio[:, :, 1]  # G
     valid_mask = black_mask & (sum_rgb[:, :, 0] > 1e-6)
@@ -103,22 +111,11 @@ def CreateHistogram(image_path, output_path):
     print(f"Saved 1250-dim histogram for: {filename}")
 
 def CreateHistogram_rg_gb(image_path, output_path):
-    bin_width = 0.02
-    num_bins = int(1.0 / bin_width)
-    filename = os.path.splitext(os.path.basename(image_path))[0]
-    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-
-    # # 黒以外の領域をマスク（正規化後の値に対応）
-    # mask = cv2.inRange(img, (1e-6, 1e-6, 1e-6), (1.0, 1.0, 1.0))
-    # valid_mask = mask.flatten() > 0
-
+    filename, _,sum_rgb, rgb_ratio, black_mask=load_and_normalize_image(image_path)
 
     # ==============================
     # 2D ヒストグラム（rg空間 &gb空間）
     # ==============================
-    black_mask = np.any(img > 0, axis=2)
-    sum_rgb = np.sum(img, axis=2, keepdims=True) + 1e-6
-    rgb_ratio = img / sum_rgb
     r_ratio = rgb_ratio[:, :, 2]  # R
     g_ratio = rgb_ratio[:, :, 1]  # G
     b_ratio = rgb_ratio[:, :, 0]  # B
@@ -155,7 +152,7 @@ def CreateHistogram_rg_gb(image_path, output_path):
             else:
                 combined[y, x] = upsampled_gb_rotated[y, x]
 
-    stacked = np.stack([combined], axis=-1)  # (224, 224, 1)
+    stacked = np.stack([combined], axis = 0)  # (1, 224, 224)
 
     np.save(os.path.join(output_path, f"{filename}.npy"), stacked)
     print(f"Saved upsampled 224x224x2 histogram to: {filename}.npy")
@@ -176,14 +173,15 @@ def CreateHistogram_rg_gb(image_path, output_path):
     ax2 = fig2.add_subplot(1, 1, 1)
     im2 = ax2.imshow(hist_gb_2d.T, origin='lower', cmap='viridis',
                     extent=[0, 1, 0, 1], aspect='auto',
-                    norm=LogNorm(vmin=1, vmax=hist_gb_2d.max()))  # Logスケーリング
+                    norm=LogNorm(vmin=1, vmax=hist_gb_2d.max()))  
     ax2.set_title(f"2D Hist (gb count): {filename}")
     ax2.set_xlabel('g = G / (R+G+B)')
     ax2.set_ylabel('b = B / (R+G+B)')
     ax2.grid(True, alpha=0.3)
     fig2.colorbar(im2, ax=ax2, label='Pixel Count (log scale)')
 
-    image_to_show = stacked[..., 0]
+    image_to_show = stacked[0, :, :]
+
 
     fig3 = plt.figure(figsize=(6, 6))
     ax3 = fig3.add_subplot(1, 1, 1)
