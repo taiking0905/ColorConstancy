@@ -15,8 +15,8 @@ python -m venv ColorConstancy_env
 
 pip install -r requirements.txt
 
-dir /a-d /b "D:\ColorConstancy\histogram" | find /c /v ""
-```
+dir /a-d /b "E:\ColorConstancy\histogram" | find /c /v ""
+```"E:\ColorConstancy\histogram"
 
 ### 2.仮想環境起動方法
 
