@@ -34,7 +34,7 @@ def main():
 
 
     # 5. モデル定義
-    model = ResNetModel(output_dim=3)
+    model = ResNetModel()
     model.to(DEVICE)
     # Adamオプティマイザで学習
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT)

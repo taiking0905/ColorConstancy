@@ -27,6 +27,9 @@ class ResNetModel(nn.Module):
             bias=False
         )
         model.conv1.weight.data = new_weight
+        
+        self.model = model
+
 
         # 既存のfc層の前にDropoutを挟む構造に変更
         in_features = self.model.fc.in_features
@@ -35,8 +38,7 @@ class ResNetModel(nn.Module):
             nn.Linear(in_features, output_dim)   # 最終出力
         )
 
-        self.model = model
-
+        
     def forward(self, x):
         return self.model(x)  # 順伝播（出力は shape: [batch_size, 3]）
 

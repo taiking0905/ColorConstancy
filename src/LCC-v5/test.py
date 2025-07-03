@@ -39,7 +39,7 @@ def main():
     num_samples = min(5, len(X_test))  # データ数に合わせる
     with torch.no_grad():
         for i in range(num_samples):
-            x = torch.tensor(X_test[i], dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(DEVICE)
+            x = torch.tensor(X_test[i], dtype=torch.float32).unsqueeze(0).to(DEVICE)
             pred = model(x)[0].cpu()          #  (r, g, b)
             pred = pred / torch.norm(pred)
 

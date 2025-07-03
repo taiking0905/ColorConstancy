@@ -21,7 +21,7 @@ class HistogramDataset(torch.utils.data.Dataset):
             x = self.random_erase(x)
 
         # Tensorに変換（[1, 224, 224] で CNN対応）
-        x = torch.tensor(x, dtype=torch.float32).unsqueeze(0)
+        x = torch.tensor(x, dtype=torch.float32)
         y = torch.tensor(y, dtype=torch.float32)
         return x, y
 
