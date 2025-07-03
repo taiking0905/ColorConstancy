@@ -16,6 +16,9 @@ def main():
 
     print(X_train.shape)  # → (N, 1, 224, 224)
     print(y_train_df.head())  # → R, G, B列
+    print(torch.cuda.is_available())  # TrueならOK
+    print(torch.cuda.get_device_name())  # GPU名が出る
+
 
 
 
