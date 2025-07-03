@@ -20,8 +20,19 @@ OUTPUT_DIR = LCC_DIR / "outputs"
 # ハイパーパラメータ
 # -------------------------------
 EPOCHS = 100
-BATCH_SIZE = 32
-LEARNING_RATE = 0.001
+BATCH_SIZE = 16
+LEARNING_RATE =  3e-4
+WEIGHT = 5e-5
+DROPOUT = 0.5
+
+# -------------------------------
+# 設定パラメータ
+# -------------------------------
+OUTPUT_DIM = 3
+ERASE_PROB =0.5
+ERASE_SIZE = 10
+
+
 
 # -------------------------------
 # デバイス設定

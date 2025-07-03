@@ -14,7 +14,7 @@ def main():
     # X_val, y_val_df = load_dataset(VAL_HIST_RG_GB_DIR, REAL_RGB_JSON_PATH)
     # 出力がX= numpy Y=df
 
-    print(X_train.shape)  # → (N, 1, 448, 224)
+    print(X_train.shape)  # → (N, 1, 224, 224)
     print(y_train_df.head())  # → R, G, B列
 
 

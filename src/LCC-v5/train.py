@@ -1,10 +1,12 @@
 import torch
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
 from load_dataset import load_dataset
+from HistogramDataset import HistogramDataset
 from ResNetModel import ResNetModel, angular_loss, train_one_epoch, evaluate
-from config import HISTOGRAM_RG_GB_DIR,VAL_HIST_RG_GB_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
+from config import HISTOGRAM_RG_GB_DIR, VAL_HIST_RG_GB_DIR, REAL_RGB_JSON_PATH, EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, WEIGHT,ERASE_PROB, ERASE_SIZE, DEVICE, set_seed
+
 
 def main():
     set_seed() 
@@ -16,25 +18,27 @@ def main():
     # 出力がX= numpy Y=df
     
     # 2. Tensorに変換
-    X_train = torch.tensor(X_train, dtype=torch.float32)
-    y_train = torch.tensor(y_train_df[["R", "G", "B"]].values, dtype=torch.float32)
-    X_val = torch.tensor(X_val, dtype=torch.float32)
-    y_val = torch.tensor(y_val_df[["R", "G", "B"]].values, dtype=torch.float32)
+    y_train = y_train_df[["R", "G", "B"]].values
+    y_val = y_val_df[["R", "G", "B"]].values
+    
+    print(f"X_train.shape = {X_train.shape}, y_train.shape = {y_train.shape}")
+    print(f"X_val.shape = {X_val.shape}, y_val.shape = {y_val.shape}")
 
+    # 3. TensorDataset作成（ここで erase 機能を組み込む）
+    train_dataset = HistogramDataset(X_train, y_train, erase_prob=ERASE_PROB, erase_size = ERASE_SIZE)
+    val_dataset = HistogramDataset(X_val, y_val)
 
-    # 3. TensorDataset作成
-    train_dataset = TensorDataset(X_train, y_train)
-    val_dataset = TensorDataset(X_val, y_val)
+    # 4. DataLoader作成 pin_memory=Trueこれを使うとGPUへの転送が速くなる
+    train_loader = DataLoader(train_dataset, BATCH_SIZE, shuffle=True, num_workers=2)
+    val_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=2)
 
-    # 4. DataLoader作成
-    train_loader = DataLoader(train_dataset, BATCH_SIZE, shuffle=True)
-    val_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False)
 
     # 5. モデル定義
     model = ResNetModel(output_dim=3)
     model.to(DEVICE)
     # Adamオプティマイザで学習
-    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT)
+
 
     # 損失関数はRGBベクトル間の角度誤差
     loss_fn = angular_loss
@@ -56,6 +60,7 @@ def main():
 
     # 7. モデル保存
     torch.save(model.state_dict(), OUTPUT_DIR / 'resnet_model.pth')
+    plt.savefig(OUTPUT_DIR / 'loss_curve.png')
 
     # 8. 学習曲線の可視化
     plt.plot(train_losses, label='Train Loss')

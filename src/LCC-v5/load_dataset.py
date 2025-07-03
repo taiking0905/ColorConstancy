@@ -1,12 +1,18 @@
 import json
 import os
+import logging
 import pandas as pd
 import numpy as np
 
+logging.basicConfig(level=logging.INFO)
+
 def load_dataset(npy_dir, json_path):
     # 1. JSON読み込みと辞書化
-    with open(json_path, 'r') as f:
-        json_data = json.load(f)
+    try:
+        with open(json_path, 'r') as f:
+            json_data = json.load(f)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load JSON: {e}")
 
     rgb_dict = {item["filename"]: item["real_rgb"] for item in json_data}
 
@@ -14,17 +20,22 @@ def load_dataset(npy_dir, json_path):
     X_list = []
     y_list = []
 
-    for filename in os.listdir(npy_dir):
+    for filename in sorted(os.listdir(npy_dir)):
         if not filename.endswith("_masked.npy"):
             continue
 
         base_id = filename.replace("_masked.npy", "")
         if base_id not in rgb_dict:
-            print(f"Warning: {base_id} not in JSON, skipping")
+            logging.warning(f"Warning: {base_id} not in JSON, skipping")
             continue
 
         npy_path = os.path.join(npy_dir, filename)
-        arr = np.load(npy_path)
+        try:
+            arr = np.load(npy_path)
+        except Exception as e:
+            logging.warning(f"Failed to load {npy_path}: {e}")
+            continue
+
         X_list.append(arr)  # shape: (224, 224)
 
         R, G, B = rgb_dict[base_id]
@@ -34,8 +45,9 @@ def load_dataset(npy_dir, json_path):
     X = np.stack(X_list)  # shape: (N, 224, 224)
     y = np.array(y_list)  # shape: (N, 3)
 
-    # 🌟 L2ノルムで正規化（1行ずつのベクトル）
+    # 🌟 L2ノルムで正規化（1行ずつのベクトル） y_normalized = (R, G, B)/sqrt(R^2 + G^2 + B^2)
     norm = np.linalg.norm(y, axis=1, keepdims=True)
+    norm[norm == 0] = 1
     y_normalized = y / norm  # shape: (N, 3)
 
     # DataFrameで返す

@@ -134,21 +134,32 @@ def CreateHistogram_rg_gb(image_path, output_path):
     for g_bin, b_bin in zip(g_bins, b_bins):
         hist_gb_2d[b_bin, g_bin] += 1
 
-    presence_rg = hist_rg_2d.astype(np.float32)
-    presence_gb = hist_gb_2d.astype(np.float32)
+    if hist_rg_2d.max() > 0:
+        presence_rg = (hist_rg_2d / hist_rg_2d.max()).astype(np.float32)
+    else:
+        presence_rg = hist_rg_2d.astype(np.float32)
+
+    if hist_gb_2d.max() > 0:
+        presence_gb = (hist_gb_2d / hist_gb_2d.max()).astype(np.float32)
+    else:
+        presence_gb = hist_gb_2d.astype(np.float32)
+
 
     upsampled_rg = cv2.resize(presence_rg, (224, 224), interpolation=cv2.INTER_LINEAR)
     upsampled_gb = cv2.resize(presence_gb, (224, 224), interpolation=cv2.INTER_LINEAR)
 
+    rg_hist_8bit = (upsampled_rg * 255).astype(np.uint8)
+    gb_hist_8bit = (upsampled_gb * 255).astype(np.uint8)
+
     # 180度回転
-    upsampled_gb_rotated = np.rot90(upsampled_gb, 2)
+    upsampled_gb_rotated = np.rot90(gb_hist_8bit, 2)
 
     combined = np.zeros((224, 224), dtype=np.float32)
 
     for y in range(224):
         for x in range(224):
             if x + y <= 224:  # 境界を rg 側に含める
-                combined[y, x] = upsampled_rg[y, x]
+                combined[y, x] = rg_hist_8bit[y, x]
             else:
                 combined[y, x] = upsampled_gb_rotated[y, x]
 
