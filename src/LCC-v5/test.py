@@ -33,11 +33,12 @@ def main():
         for i in range(num_samples):
             x = X_test[i].unsqueeze(0).to(DEVICE)  # shape: (1, input_dim)
             pred = model(x)[0].cpu()          #  (r, g, b)
+            pred = pred / torch.norm(pred)
 
-            # モデル出力（r_pred, g_pred）
+            # モデル出力（r_pred, g_pred, b_pred）
             r_pred, g_pred, b_pred= pred[0].item(), pred[1].item(), pred[2].item()
 
-            # 正解ラベル（r_true, g_true）はすでに比率
+            # 正解ラベル（r_true, g_true, b_true）はすでに比率
             r_true, g_true, b_true = y_test[i].numpy()
 
             print(f"{i+1}: Pred (r, g, b): ({r_pred:.4f}, {g_pred:.4f}, {b_pred:.4f}) | True (r, g, b): ({r_true:.4f}, {g_true:.4f}, {b_true:.4f})")

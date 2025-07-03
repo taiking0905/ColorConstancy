@@ -19,7 +19,7 @@ OUTPUT_DIR = LCC_DIR / "outputs"
 # -------------------------------
 # ハイパーパラメータ
 # -------------------------------
-EPOCHS = 10
+EPOCHS = 100
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 
