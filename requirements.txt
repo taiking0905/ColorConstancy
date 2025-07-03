@@ -6,3 +6,5 @@ scipy
 pyqt5
 torch
 rawpy
+pandas
+torchvision
