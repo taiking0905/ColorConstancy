@@ -26,7 +26,7 @@ def main():
     model.eval()
 
     # DataLoader作成 pin_memory=Trueこれを使うとGPUへの転送が速くなる
-    test_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=2)
+    test_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
 
 
     # 3. 評価実行（RGBベクトル間角度誤差）

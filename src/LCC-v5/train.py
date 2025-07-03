@@ -29,8 +29,8 @@ def main():
     val_dataset = HistogramDataset(X_val, y_val)
 
     # 4. DataLoader作成 pin_memory=Trueこれを使うとGPUへの転送が速くなる
-    train_loader = DataLoader(train_dataset, BATCH_SIZE, shuffle=True, num_workers=2)
-    val_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=2)
+    train_loader = DataLoader(train_dataset, BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
+    val_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
 
 
     # 5. モデル定義
