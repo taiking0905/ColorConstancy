@@ -5,11 +5,16 @@ import matplotlib.pyplot as plt
 from load_dataset import load_dataset
 from HistogramDataset import HistogramDataset
 from ResNetModel import ResNetModel, angular_loss, evaluate
-from config import HISTOGRAM_RG_GB_DIR, TEST_HIST_DIR, REAL_RGB_JSON_PATH, OUTPUT_DIR,OUTPUT_DIM, BATCH_SIZE, DEVICE, set_seed
+from config import get_base_dir, HISTOGRAM_RG_GB_DIR, TEST_HIST_DIR, REAL_RGB_JSON_PATH, OUTPUT_DIR,OUTPUT_DIM, BATCH_SIZE, DEVICE, set_seed
 
 
 def main():
     set_seed()
+    base_dir = get_base_dir()
+    print("Base dir:", base_dir)
+    print("DEVICE:", DEVICE)
+
+    
     # 1. テストデータの読み込み
     X_test, y_test_df = load_dataset(HISTOGRAM_RG_GB_DIR, REAL_RGB_JSON_PATH)
     

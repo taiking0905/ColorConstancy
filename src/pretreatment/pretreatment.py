@@ -5,7 +5,6 @@ import shutil
 from config import setup_directories
 from CreateHistogram import CreateHistogram, CreateHistogram_rg_gb
 from MaskProcessing import MaskProcessing
-from TeacherProcessing import TeacherProcessing
 
        
 def pretreatment():

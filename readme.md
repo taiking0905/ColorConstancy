@@ -6,7 +6,7 @@
 
 ## ✅ 環境構築手順
 
-### 1. Python仮想環境の作成
+### Python仮想環境の作成
 
 ```bash
 python -m venv ColorConstancy_env   
@@ -15,15 +15,16 @@ python -m venv ColorConstancy_env
 
 pip install -r requirements.txt
 
-dir /a-d /b "E:\ColorConstancy\histogram" | find /c /v ""
 ```"E:\ColorConstancy\histogram"
 
-### 2.仮想環境起動方法
+## 🔧 インストール手順（GPU対応）
+
+このプロジェクトでは PyTorch の CUDA 対応版（12.8）を使用しています。  
+以下のコマンドでインストールしてください：
 
 ```bash
-.\ColorConstancy_env\Scripts\Activate   
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 
-```
 
 ```bash
 

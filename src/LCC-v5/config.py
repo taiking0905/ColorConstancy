@@ -3,13 +3,32 @@ from pathlib import Path
 import torch
 import numpy as np
 import random
+import psutil
+import os
 
 # -------------------------------
 # パス設定
 # -------------------------------
+_base_dir = None
 
+def find_drive_with_folder(folder_name="ColorConstancy"):
+    for part in psutil.disk_partitions():
+        if 'removable' in part.opts.lower():
+            drive = part.mountpoint
+            if os.path.exists(os.path.join(drive, folder_name)):
+                return drive
+    return None
 
-BASE_DIR = Path("D:/ColorConstancy")
+def get_base_dir():
+    global _base_dir
+    if _base_dir is None:
+        drive = find_drive_with_folder("ColorConstancy")
+        if not drive:
+            raise RuntimeError("ドライブが見つかりません")
+        _base_dir = Path(drive) / "ColorConstancy"
+    return _base_dir
+
+BASE_DIR = get_base_dir()
 LCC_DIR = Path(__file__).resolve().parent
 HISTOGRAM_RG_GB_DIR = BASE_DIR / "histogram_rg_gb"
 VAL_HIST_RG_GB_DIR = BASE_DIR / "valhist_rg_gb"
@@ -31,6 +50,7 @@ DROPOUT = 0.5
 OUTPUT_DIM = 3
 ERASE_PROB =0.5
 ERASE_SIZE = 10
+ACCUMULATION_STEPS = 16
 
 
 

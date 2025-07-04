@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
-import torchvision.models as models
 import torch.nn.functional as F
-from torchvision.models import ResNet18_Weights
+from torchvision.models import resnet18
 
 from config import DROPOUT, OUTPUT_DIM, DEVICE
 
@@ -10,12 +9,7 @@ from config import DROPOUT, OUTPUT_DIM, DEVICE
 class ResNetModel(nn.Module):
     def __init__(self, output_dim = OUTPUT_DIM, dropout_rate = DROPOUT):
         super().__init__()
-        weights = ResNet18_Weights.DEFAULT
-        model = models.resnet18(weights=weights)
-
-         # conv1 の重みを1ch用に変換（3ch → 平均で1chへ）
-        pretrained_weight = model.conv1.weight
-        new_weight = pretrained_weight.mean(dim=1, keepdim=True)
+        model = resnet18(weights=None)
 
         # 入力チャンネルを1ch（グレースケールやヒストグラム画像）に変更
         model.conv1 = nn.Conv2d(
@@ -26,7 +20,6 @@ class ResNetModel(nn.Module):
             padding=3,
             bias=False
         )
-        model.conv1.weight.data = new_weight
         
         self.model = model
 
@@ -61,24 +54,32 @@ def angular_loss(pred, target):
 
 
 # 🔁 1エポック分の訓練処理
-def train_one_epoch(model, loader, optimizer, loss_fn):
-    model.train()  # 訓練モード（DropoutやBatchNormを有効化）
+def train_one_epoch(model, loader, optimizer, loss_fn, accumulation_steps=1):
+    model.train()
     total_loss = 0.0
 
-    for X_batch, y_batch in loader:
+    optimizer.zero_grad()
+
+    for i, (X_batch, y_batch) in enumerate(loader):
         X_batch = X_batch.to(DEVICE)
         y_batch = y_batch.to(DEVICE)
 
-        optimizer.zero_grad()               # 勾配の初期化
-        pred = model(X_batch)               # モデル予測（順伝播）
-        loss = loss_fn(pred, y_batch)       # 損失を計算
-        loss.backward()                     # 勾配計算（逆伝播）
-        optimizer.step()                    # パラメータ更新
+        pred = model(X_batch)
+        loss = loss_fn(pred, y_batch)
+        loss = loss / accumulation_steps  # 🔑 勾配スケーリング
 
-        total_loss += loss.item()           # バッチごとの損失を蓄積
+        loss.backward()
 
-    average_loss = total_loss / len(loader)  # バッチ数で割って平均損失を算出
+        # ✅ accumulation_steps回ごとにパラメータ更新
+        if (i + 1) % accumulation_steps == 0 or (i + 1) == len(loader):
+            optimizer.step()
+            optimizer.zero_grad()
+
+        total_loss += loss.item() * accumulation_steps  # 元のlossに戻す
+
+    average_loss = total_loss / len(loader)
     return average_loss
+
 
 
 # 🔍 評価関数（検証・テスト用）

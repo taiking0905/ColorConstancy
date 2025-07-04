@@ -5,6 +5,20 @@ import matplotlib.pyplot as plt
 from load_dataset import load_dataset
 from ResNetModel import ResNetModel, angular_loss, train_one_epoch, evaluate
 from config import HISTOGRAM_RG_GB_DIR,VAL_HIST_RG_GB_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
+import psutil
+import os
+
+
+
+def find_drive_with_folder(folder_name="target_folder"):
+    for part in psutil.disk_partitions():
+        if 'removable' in part.opts.lower():  # USBなどに限定したいとき
+            drive = part.mountpoint
+            if os.path.exists(os.path.join(drive, folder_name)):
+                return drive
+    return None
+
+
 
 def main():
     set_seed() 
@@ -19,9 +33,11 @@ def main():
     print(torch.cuda.is_available())  # TrueならOK
     print(torch.cuda.get_device_name())  # GPU名が出る
 
-
-
-
+    drive = find_drive_with_folder("ColorConstancy")
+    if drive:
+        print(f"対象のドライブ: {drive}")
+    else:
+        print("該当フォルダを含むドライブが見つかりませんでした。")
 
 
 if __name__ == "__main__":

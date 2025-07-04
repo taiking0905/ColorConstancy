@@ -1,14 +1,35 @@
 from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
+import psutil
+import os
 
 # ======== Matplotlib設定 ========
 matplotlib.use('TkAgg')  # TkAggバックエンドを使用（ウィンドウ移動対応）
 
 # ======== グローバル定数 ========
 
+def find_drive_with_folder(folder_name="target_folder"):
+    for part in psutil.disk_partitions():
+        if 'removable' in part.opts.lower():  # USBなどに限定したいとき
+            drive = part.mountpoint
+            if os.path.exists(os.path.join(drive, folder_name)):
+                return drive
+    return None
+
+_base_dir = None
+
+def get_base_dir():
+    global _base_dir
+    if _base_dir is None:
+        drive = find_drive_with_folder("ColorConstancy")
+        if not drive:
+            raise RuntimeError("該当フォルダを含むドライブが見つかりません。")
+        _base_dir = Path(drive) / "ColorConstancy"
+    return _base_dir
+
 # データパスのベース
-BASE_PATH = Path("D:/ColorConstancy")
+BASE_PATH = Path(_base_dir)
 
 # カメラ設定（black/whiteレベル）
 BLACK_LEVEL = 0
