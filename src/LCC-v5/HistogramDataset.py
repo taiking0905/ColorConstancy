@@ -13,7 +13,7 @@ class HistogramDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         # 画像取得 
-        x = self.X[idx]
+        x = self.X[idx].copy()
         y = self.y[idx]
 
         # eraseを確率で適用

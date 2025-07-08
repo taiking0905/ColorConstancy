@@ -25,14 +25,17 @@ def main():
     val_dataset = HistogramDataset(X_test, y_test)
 
     # 2. モデル構造の再定義（構造は学習と同じに！）
-    model = ResNetModel(output_dim=OUTPUT_DIM)
+    model = ResNetModel().to(DEVICE)
+    try:
+        model = torch.compile(model, backend="eager")
+    except Exception as e:
+        print(f"torch.compile failed: {e}")
     model.load_state_dict(torch.load(OUTPUT_DIR / 'resnet_model.pth'))  # 学習済みモデルの読み込み
-    model.to(DEVICE)  
+
     model.eval()
 
     # DataLoader作成 pin_memory=Trueこれを使うとGPUへの転送が速くなる
-    test_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
-
+    test_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True,persistent_workers=True)
 
     # 3. 評価実行（RGBベクトル間角度誤差）
     test_loss = evaluate(model, test_loader, angular_loss)

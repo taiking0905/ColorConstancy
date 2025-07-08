@@ -38,7 +38,7 @@ OUTPUT_DIR = LCC_DIR / "outputs"
 # -------------------------------
 # ハイパーパラメータ
 # -------------------------------
-EPOCHS = 100
+EPOCHS = 1000
 BATCH_SIZE = 16
 LEARNING_RATE =  3e-4
 WEIGHT = 5e-5
