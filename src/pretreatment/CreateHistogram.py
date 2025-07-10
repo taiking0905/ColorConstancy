@@ -81,8 +81,8 @@ def CreateHistogram(image_path, output_path):
     # ======================
 
     # 左端・右端に配置（モニタサイズに応じて調整）
-    move_figure(fig1, 0, 100)        # 左端（x=0, y=100）
-    move_figure(fig2, 1200, 100)     # 右寄り（x=1200, y=100）※必要に応じて調整
+    move_figure(fig1, 0, 20)        # 左端
+    move_figure(fig2, 60, 20)     # 右寄り
 
     # ========= Enterで同時に閉じる =========
     def on_key(event):
@@ -208,9 +208,9 @@ def CreateHistogram_rg_gb(image_path, output_path):
     # ======================
 
     # 左端・右端に配置（モニタサイズに応じて調整）
-    move_figure(fig1, 0, 100)        # 左端（x=0, y=100）
-    move_figure(fig2, 1300, 100)     # 右寄り（x=1200, y=100）※必要に応じて調整
-    move_figure(fig3, 650, 100)
+    move_figure(fig1, 0, 20)        # 左端（x=0, y=100）
+    move_figure(fig2, 30, 20)     # 右寄り（x=1200, y=100）※必要に応じて調整
+    move_figure(fig3, 60, 20)
 
     # ========= Enterで同時に閉じる =========
     def on_key(event):

@@ -3,6 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import psutil
 import os
+import tkinter as tk
 
 # ======== Matplotlib設定 ========
 matplotlib.use('TkAgg')  # TkAggバックエンドを使用（ウィンドウ移動対応）
@@ -19,17 +20,25 @@ def find_drive_with_folder(folder_name="target_folder"):
 
 _base_dir = None
 
+def find_drive_with_folder(folder_name="ColorConstancy"):
+    for part in psutil.disk_partitions():
+        if 'removable' in part.opts.lower():
+            drive = part.mountpoint
+            if os.path.exists(os.path.join(drive, folder_name)):
+                return drive
+    return None
+
 def get_base_dir():
     global _base_dir
     if _base_dir is None:
         drive = find_drive_with_folder("ColorConstancy")
         if not drive:
-            raise RuntimeError("該当フォルダを含むドライブが見つかりません。")
+            raise RuntimeError("ドライブが見つかりません")
         _base_dir = Path(drive) / "ColorConstancy"
     return _base_dir
 
 # データパスのベース
-BASE_PATH = Path(_base_dir)
+BASE_PATH = get_base_dir()
 
 # カメラ設定（black/whiteレベル）
 BLACK_LEVEL = 0
@@ -66,12 +75,27 @@ def setup_directories():
 
 # ======== ウィンドウ配置関数 ========
 
+def get_screen_size():
+    root = tk.Tk()
+    root.withdraw()  # ウィンドウを表示しない
+    width = root.winfo_screenwidth()
+    height = root.winfo_screenheight()
+    root.destroy()
+    return width, height
+
+
 def move_figure(fig, x: int, y: int):
     """
     Matplotlibのウィンドウ位置を画面上の指定座標(x, y)に移動する。
     """
+    screen_w, screen_h = get_screen_size()
+    x = int(screen_w * x / 100)
+    y = int(screen_h * y / 100)
     backend = plt.get_backend()
+
     if backend == 'TkAgg':
         fig.canvas.manager.window.wm_geometry(f"+{x}+{y}")
-    else:
-        print(f"ウィンドウ移動はこのバックエンドでは未対応: {backend}")
+    elif backend == 'WXAgg':
+        fig.canvas.manager.window.SetPosition((x, y))
+    elif backend in ['Qt4Agg', 'Qt5Agg', 'QtAgg']:
+        fig.canvas.manager.window.move(x, y)
