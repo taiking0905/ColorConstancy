@@ -5,7 +5,7 @@ import numpy as np
 from config import BLACK_LEVEL, WHITE_LEVEL, move_figure
 
 # マスク処理を行う関数
-def MaskProcessing(image_path, output_path):
+def MaskProcessing(image_path, output_path, checker_path):
     coords = [] # クリックした座標を保存するリスト
     ACTION = {"next": False, "quit": False}  # 初期化
 
@@ -28,16 +28,28 @@ def MaskProcessing(image_path, output_path):
         mask = np.ones_like(img, dtype=np.float32)
         pts = np.array([coords], dtype=np.int32)
         cv2.fillPoly(mask, pts, (0.0, 0.0, 0.0))
-        masked_img = img * mask 
+        masked_img = img * mask
 
-         # 表示用マスク（uint8）
+        # 表示用マスク（uint8）
         mask_display = np.ones_like(img_display, dtype=np.uint8) * 255
         cv2.fillPoly(mask_display, pts, (0, 0, 0))
         masked_display = cv2.bitwise_and(img_display, mask_display)
 
+        # マスク画像保存
         cv2.imwrite(output_path, (masked_img * 255).astype(np.uint8))
-
         print(f"Saved masked image to: {output_path}")
+
+        # 🔽 ここから追加処理 🔽
+        # カラーチェッカー領域だけを切り出して保存・表示
+        rect = cv2.boundingRect(pts)
+        x, y, w, h = rect
+        cropped_checker = img[y:y+h, x:x+w]
+        cropped_checker_uint8 = (cropped_checker * 255).astype(np.uint8)
+    
+        cv2.imwrite(checker_path, cropped_checker_uint8)
+        print(f"Saved cropped checker region to: {checker_path}")
+
+        # 表示にも追加
         ax.imshow(cv2.cvtColor(masked_display, cv2.COLOR_BGR2RGB))
         ax.set_title("Press Enter to continue or q to quit")
         fig.canvas.draw()

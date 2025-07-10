@@ -5,6 +5,7 @@ import shutil
 from config import setup_directories
 from CreateHistogram import CreateHistogram, CreateHistogram_rg_gb
 from MaskProcessing import MaskProcessing
+from AnalayzeWhite import analyze_white_patch
 
        
 def pretreatment():
@@ -21,12 +22,19 @@ def pretreatment():
             filename = os.path.splitext(os.path.basename(image_path))[0]
             # マスク処理した画像の名前を設定
             image_masked_path = os.path.join(dirs["MASK"], f"{filename}_masked.png")
+            image_checker_path = os.path.join(dirs["COLORCHECKER"], f"{filename}_checker.png")
             # マスク処理を実行 result=action
-            result = MaskProcessing(image_path, image_masked_path)
+            result = MaskProcessing(image_path, image_masked_path,image_checker_path)
 
             if result["quit"]:
                 print("Processing stopped by user.")
                 break
+
+            mean_white = analyze_white_patch(image_checker_path)
+
+             # （任意）結果の記録など
+            if mean_white is not None:
+                print(f"✅ {filename}: 平均白 = {mean_white.astype(int)}")
 
             # 教師データの画像の名前を設定
             # image_corrected_path = os.path.join(dirs["TEACHER"], f"{filename}_corrected.png")
@@ -46,9 +54,9 @@ def pretreatment():
 
             # ここで画像を END ディレクトリに移動 本番では使用する
             # 使い終わった画像を END ディレクトリに移動
-            dst_path = os.path.join(dirs["END"], os.path.basename(image_path))
-            shutil.move(image_path, dst_path)
-            print(f"Moved {image_path} → {dst_path}")
+            # dst_path = os.path.join(dirs["END"], os.path.basename(image_path))
+            # shutil.move(image_path, dst_path)
+            # print(f"Moved {image_path} → {dst_path}")
 
         except Exception as e:
             print(f"処理中にエラーが発生しました: {e}")

@@ -54,6 +54,7 @@ def setup_directories():
     dirs = {
         "INPUT": BASE_PATH / "datasets",
         "MASK": BASE_PATH / "masking",
+        "COLORCHECKER": BASE_PATH/ "colorchecker",
         "HIST": BASE_PATH / "histogram",
         "HIST_RG_GB": BASE_PATH / "histogram_rg_gb",
         # "TEACHER": BASE_PATH / "teacher",
