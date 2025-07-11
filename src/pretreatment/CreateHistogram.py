@@ -4,7 +4,7 @@ import numpy as np
 import os
 import pandas as pd
 
-from config import move_figure
+from config import move_figure, to_8bit_gamma
 
 bin_width = 0.02
 num_bins = int(1.0 / bin_width)
@@ -32,7 +32,7 @@ def CreateHistogram(image_path, output_path):
     # RGB ヒストグラム表示
     # ======================
 
-    display_img = (img * 255).astype('uint8')
+    display_img = to_8bit_gamma(img)
     mask = cv2.inRange(display_img, (1, 1, 1), (255, 255, 255))  # 表示には使える
     norm_display = display_img.astype('float32') / 255.0
 

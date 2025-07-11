@@ -1,6 +1,5 @@
 import os
 import glob
-import shutil 
 
 from config import setup_directories
 from CreateHistogram import CreateHistogram, CreateHistogram_rg_gb
@@ -30,11 +29,7 @@ def pretreatment():
                 print("Processing stopped by user.")
                 break
 
-            mean_white = analyze_white_patch(image_checker_path)
-
-             # （任意）結果の記録など
-            if mean_white is not None:
-                print(f"✅ {filename}: 平均白 = {mean_white.astype(int)}")
+            analyze_white_patch(image_checker_path, dirs["REAL_RGB_JSON"])
 
             # 教師データの画像の名前を設定
             # image_corrected_path = os.path.join(dirs["TEACHER"], f"{filename}_corrected.png")

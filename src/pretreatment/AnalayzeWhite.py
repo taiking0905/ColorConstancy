@@ -1,16 +1,47 @@
 import matplotlib.pyplot as plt
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+import os
+import json
 
-from config import move_figure
+from config import move_figure, to_8bit_gamma
 
-def analyze_white_patch(patch_path, gamma=2.2, threshold=0.05):
+
+def save_color_to_json(filename, mean_color, json_path):
+    # 画像ファイル名から拡張子と "_masked" を取り除く
+    basename = os.path.basename(filename)
+    name = basename.replace('_checker.png', '')
+
+    # 辞書として整形
+    entry = {
+        "filename": name,
+        "real_rgb": [float(c) for c in mean_color]
+    }
+
+    # すでにファイルが存在していれば読み込む、なければ新規作成
+    if os.path.exists(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        data = []
+
+    # 同じファイル名のデータが既にあれば上書き、なければ追加
+    data = [e for e in data if e["filename"] != name]
+    data.append(entry)
+
+    # JSONとして保存
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    print(f"✅ JSONに保存しました: {name}")
+
+def analyze_white_patch(image_checker_path, real_rgb_json):
     # 画像の読み込み（補正前前提）
-    img = cv2.imread(patch_path).astype(np.float32)
+    img = cv2.imread(image_checker_path, cv2.IMREAD_UNCHANGED).astype(np.float32)
 
     # 表示用（γ補正 + 拡大）
-    img_normalized = img / 255.0
-    display_img = np.power(img_normalized, 1.0 / gamma)
+    display_img = to_8bit_gamma(img)
     display_img = cv2.resize(display_img, None, fx=4, fy=4, interpolation=cv2.INTER_NEAREST)
    
     coords = []
@@ -43,27 +74,33 @@ def analyze_white_patch(patch_path, gamma=2.2, threshold=0.05):
 
     # 選択領域のピクセルを取得
     region_pixels = img[mask == 1].reshape(-1, 3)
+    colors, counts = np.unique(region_pixels, axis=0, return_counts=True)
 
-    # 色のユニーク集計
-    colors, counts = np.unique((region_pixels * 255).astype(np.uint8), axis=0, return_counts=True)
-    total = counts.sum()
-    ratios = counts / total
+    # 最大出現数の色を基準に
+    max_idx = counts.argmax()
+    base_color = colors[max_idx]  # shape: (3,)
 
-    # フィルタ処理（影響力5%以上）
-    mask_valid = ratios >= threshold
+    # ユークリッド距離を計算
+    dists = np.linalg.norm(colors - base_color, axis=1)
+
+    # 閾値内の色をフィルタ
+    distance_threshold = 15  # 例: 距離10以内の色だけ使う
+    mask_valid = dists <= distance_threshold
     filtered_colors = colors[mask_valid]
     filtered_counts = counts[mask_valid]
 
+    # 採用された色があるか確認
     if len(filtered_colors) == 0:
-        print("❌ 有効な色が存在しません（5%以上の色なし）")
+        print("❌ 有効な色が存在しません（距離条件を満たす色なし）")
         return None
 
-    # 平均色を重み付きで計算
+    # 採用された色とピクセル数を表示
+    # print("✅ 採用された色とそのピクセル数（ユークリッド距離条件を満たすもの）:")
+    # for i, (color, count) in enumerate(zip(filtered_colors, filtered_counts)):
+    #     print(f"{i+1:2d}. 色 (R,G,B): {color} → ピクセル数: {count}")
+
+    # 平均色（重み付き）の計算と表示
     mean_color = (filtered_colors * filtered_counts[:, None]).sum(axis=0) / filtered_counts.sum()
-    print("📊 平均色 (R,G,B):", mean_color.astype(int))
+    print("\n🎯 平均色 (R,G,B):", mean_color.astype(int))
+    save_color_to_json(image_checker_path, mean_color, real_rgb_json)
 
-    # 色詳細の表示
-    for i, (col, cnt) in enumerate(zip(filtered_colors, filtered_counts)):
-        print(f"{i+1}. {col} : {cnt} pixels ({cnt / total:.2%})")
-
-    return mean_color
