@@ -1,5 +1,6 @@
 import os
 import glob
+import shutil
 
 from config import setup_directories
 from CreateHistogram import CreateHistogram, CreateHistogram_rg_gb
@@ -49,9 +50,9 @@ def pretreatment():
 
             # ここで画像を END ディレクトリに移動 本番では使用する
             # 使い終わった画像を END ディレクトリに移動
-            # dst_path = os.path.join(dirs["END"], os.path.basename(image_path))
-            # shutil.move(image_path, dst_path)
-            # print(f"Moved {image_path} → {dst_path}")
+            dst_path = os.path.join(dirs["END"], os.path.basename(image_path))
+            shutil.move(image_path, dst_path)
+            print(f"Moved {image_path} → {dst_path}")
 
         except Exception as e:
             print(f"処理中にエラーが発生しました: {e}")
