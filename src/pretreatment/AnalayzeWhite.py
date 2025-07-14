@@ -45,6 +45,7 @@ def analyze_white_patch(image_checker_path, real_rgb_json):
     display_img = cv2.resize(display_img, None, fx=4, fy=4, interpolation=cv2.INTER_NEAREST)
    
     coords = []
+    
 
     def onclick(event):
         if event.xdata and event.ydata and len(coords) < 4:
@@ -54,13 +55,25 @@ def analyze_white_patch(image_checker_path, real_rgb_json):
             ax.text(x+5, y-5, f"{len(coords)}", color="green", fontsize=12)
             fig.canvas.draw()
             if len(coords) == 4:
-                plt.close()
+                ax.set_title("PLEASE PRESS 'ENTER' TO CONTINUE")
+                fig.canvas.draw()
+
+    def onkey(event):
+        if event.key == 'r':
+            coords.clear()
+            ax.clear()
+            ax.imshow(cv2.cvtColor(display_img, cv2.COLOR_BGR2RGB))
+            ax.set_title("Click 4 points (Press 'r' to reset)")
+            fig.canvas.draw()
+        elif event.key == 'enter':
+            plt.close()
 
     fig, ax = plt.subplots(figsize=(8, 8))
     move_figure(fig, 0, 20)
     ax.imshow(cv2.cvtColor(display_img, cv2.COLOR_BGR2RGB))
     ax.set_title("Click 4 points for white patch region")
     fig.canvas.mpl_connect("button_press_event", onclick)
+    fig.canvas.mpl_connect("key_press_event", onkey)
     plt.show()
 
     if len(coords) < 4:
