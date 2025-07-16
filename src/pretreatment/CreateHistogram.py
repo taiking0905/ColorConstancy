@@ -85,7 +85,7 @@ def CreateHistogram(image_path, output_path):
 
     # ========= Enterで同時に閉じる =========
     def on_key(event):
-        if event.key == 'enter':
+        if event.key == ' ':
             plt.close(fig1)
             plt.close(fig2)
 
@@ -213,7 +213,7 @@ def CreateHistogram_rg_gb(image_path, output_path):
 
     # ========= Enterで同時に閉じる =========
     def on_key(event):
-        if event.key == 'enter':
+        if event.key == ' ':
             plt.close(fig1)
             plt.close(fig2)
             plt.close(fig3)

@@ -45,7 +45,7 @@ def TeacherProcessing(filename, real_rgb_json, image_path, output_path):
     plt.axis("off")
 
     def on_key(event):
-        if event.key == 'enter':
+        if event.key == ' ':
             plt.close()
 
     fig = plt.gcf()

@@ -65,7 +65,7 @@ def analyze_white_patch(image_checker_path, real_rgb_json):
             ax.imshow(cv2.cvtColor(display_img, cv2.COLOR_BGR2RGB))
             ax.set_title("Click 4 points (Press 'r' to reset)")
             fig.canvas.draw()
-        elif event.key == 'enter':
+        elif event.key == ' ':
             plt.close()
 
     fig, ax = plt.subplots(figsize=(8, 8))

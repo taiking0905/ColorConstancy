@@ -63,7 +63,7 @@ def MaskProcessing(image_path, output_path, checker_path):
             ax.imshow(img_rgb_display)
             ax.set_title("Click 4 points (Press 'r' to reset)")
             fig.canvas.draw()
-        elif event.key == 'enter':
+        elif event.key == ' ':
             ACTION["next"] = True
             plt.close()
         elif event.key == 'q':
@@ -71,7 +71,7 @@ def MaskProcessing(image_path, output_path, checker_path):
             plt.close()
 
     fig, ax = plt.subplots(figsize=(10, 9)) 
-    move_figure(fig, 0, 0) 
+    move_figure(fig, 0, 20) 
     ax.imshow(img_rgb_display)
     ax.set_title("Click 4 points (Press 'r' to reset)")
     fig.canvas.mpl_connect("button_press_event", onclick)
