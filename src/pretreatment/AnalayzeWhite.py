@@ -115,5 +115,6 @@ def analyze_white_patch(image_checker_path, real_rgb_json):
     # 平均色（重み付き）の計算と表示
     mean_color = (filtered_colors * filtered_counts[:, None]).sum(axis=0) / filtered_counts.sum()
     print("\n🎯 平均色 (R,G,B):", mean_color.astype(int))
-    save_color_to_json(image_checker_path, mean_color, real_rgb_json)
+    # BGR→RGBに変換して保存
+    save_color_to_json(image_checker_path, mean_color[::-1], real_rgb_json)
 

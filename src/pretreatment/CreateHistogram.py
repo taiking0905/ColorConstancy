@@ -223,5 +223,3 @@ def CreateHistogram_rg_gb(image_path, output_path):
     fig3.canvas.mpl_connect("key_press_event", on_key)
 
     plt.show(block=True)
-
-    print(f"Saved 1250-dim histogram for: {filename}")

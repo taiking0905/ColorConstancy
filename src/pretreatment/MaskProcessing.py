@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-from config import to_8bit_gamma, move_figure
+from config import to_8bit_gamma, move_figure, BLACK_LEVEL
 
 # マスク処理を行う関数
 def MaskProcessing(image_path, output_path, checker_path):
@@ -10,7 +10,9 @@ def MaskProcessing(image_path, output_path, checker_path):
     ACTION = {"next": False, "quit": False}  # 初期化
 
     img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED).astype(np.float32)
-
+    img = img - BLACK_LEVEL
+    img = np.clip(img, 0, None)
+    img = img.astype(np.uint16)
     img_display = to_8bit_gamma(img)
     img_rgb_display = cv2.cvtColor(img_display, cv2.COLOR_BGR2RGB)
 
