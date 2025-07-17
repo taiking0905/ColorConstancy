@@ -1,10 +1,8 @@
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-import matplotlib.pyplot as plt
+
 
 from load_dataset import load_dataset
-from ResNetModel import ResNetModel, angular_loss, train_one_epoch, evaluate
-from config import HISTOGRAM_RG_GB_DIR,VAL_HIST_RG_GB_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
+from config import TRAIN_DIR,REAL_RGB_JSON_PATH, DEVICE, set_seed
 import psutil
 import os
 
@@ -24,7 +22,7 @@ def main():
     set_seed() 
     
     # 1. データ読み込み
-    X_train, y_train_df = load_dataset(HISTOGRAM_RG_GB_DIR, REAL_RGB_JSON_PATH)
+    X_train, y_train_df = load_dataset(TRAIN_DIR, REAL_RGB_JSON_PATH)
     # X_val, y_val_df = load_dataset(VAL_HIST_RG_GB_DIR, REAL_RGB_JSON_PATH)
     # 出力がX= numpy Y=df
 

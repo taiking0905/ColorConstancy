@@ -4,15 +4,15 @@ import matplotlib.pyplot as plt
 
 from load_dataset import load_dataset
 from MLPModel import MLPModel, mse_chromaticity_loss, train_one_epoch, evaluate
-from config import HISTOGRAM_DIR,VAL_HIST_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
+from config import TRAIN_DIR,VAL_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
 
 def main():
     set_seed() 
     
 
     # 1. データ読み込み
-    X_train_df, y_train_df = load_dataset(HISTOGRAM_DIR, REAL_RGB_JSON_PATH)
-    X_val_df, y_val_df = load_dataset(VAL_HIST_DIR, REAL_RGB_JSON_PATH)
+    X_train_df, y_train_df = load_dataset(TRAIN_DIR, REAL_RGB_JSON_PATH)
+    X_val_df, y_val_df = load_dataset(VAL_DIR, REAL_RGB_JSON_PATH)
 
     # 2. Tensorに変換
     X_train = torch.tensor(X_train_df.values, dtype=torch.float32)
@@ -54,6 +54,7 @@ def main():
 
     # 7. モデル保存
     torch.save(model.state_dict(), OUTPUT_DIR / 'mlp_model.pth')
+    plt.savefig(OUTPUT_DIR / 'loss_curve.png')
 
     # 8. 学習曲線の可視化
     plt.plot(train_losses, label='Train Loss')

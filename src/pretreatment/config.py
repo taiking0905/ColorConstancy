@@ -58,6 +58,7 @@ def setup_directories():
         "COLORCHECKER": BASE_PATH/ "colorchecker",
         "HIST": BASE_PATH / "histogram",
         "HIST_RG_GB": BASE_PATH / "histogram_rg_gb",
+        "TEMP": BASE_PATH / "temp",
         # "TEACHER": BASE_PATH / "teacher",
         # "TEACHER_HIST": BASE_PATH / "teacherhist",
         "REAL_RGB_JSON": BASE_PATH / "real_rgb.json",

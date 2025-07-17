@@ -25,20 +25,20 @@ def get_base_dir():
         drive = find_drive_with_folder("ColorConstancy")
         if not drive:
             raise RuntimeError("ドライブが見つかりません")
-        _base_dir = Path(drive) / "ColorConstancy"
+        _base_dir = Path(drive) / "ColorConstancy/LCC-v5"
     return _base_dir
 
 BASE_DIR = get_base_dir()
 LCC_DIR = Path(__file__).resolve().parent
-HISTOGRAM_RG_GB_DIR = BASE_DIR / "histogram_rg_gb"
-VAL_HIST_RG_GB_DIR = BASE_DIR / "valhist_rg_gb"
-REAL_RGB_JSON_PATH = BASE_DIR / "real_rgb.json"
-TEST_HIST_DIR = BASE_DIR / "test"
+TRAIN_DIR = BASE_DIR / "train"
+VAL_DIR = BASE_DIR / "val"
+REAL_RGB_JSON_PATH = (BASE_DIR / "..") / "real_rgb.json"
+TEST_DIR = BASE_DIR / "test"
 OUTPUT_DIR = LCC_DIR / "outputs"
 # -------------------------------
 # ハイパーパラメータ
 # -------------------------------
-EPOCHS = 100
+EPOCHS = 1000
 BATCH_SIZE = 16
 LEARNING_RATE =  3e-4
 WEIGHT = 5e-5

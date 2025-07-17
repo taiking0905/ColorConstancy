@@ -37,6 +37,8 @@ def train_one_epoch(model, loader, optimizer, loss_fn):
     total_loss = 0.0
 
     for X_batch, y_batch in loader:
+        X_batch = X_batch.to(next(model.parameters()).device)  # 追加
+        y_batch = y_batch.to(next(model.parameters()).device)  # 追加
         optimizer.zero_grad()               # 勾配をリセット
         pred = model(X_batch)               # 順伝播
         loss = loss_fn(pred, y_batch)       # 損失計算
@@ -54,6 +56,8 @@ def evaluate(model, loader, loss_fn):
 
     with torch.no_grad():  # 勾配を計算しない（メモリ節約＆高速化）
         for X_batch, y_batch in loader:
+            X_batch = X_batch.to(next(model.parameters()).device)  # 追加
+            y_batch = y_batch.to(next(model.parameters()).device)  # 追加
             pred = model(X_batch)
             loss = loss_fn(pred, y_batch)
             total_loss += loss.item()

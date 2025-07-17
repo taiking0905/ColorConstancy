@@ -2,7 +2,6 @@ import os
 import glob
 
 from config import setup_directories, BLACK_LEVEL
-from CreateHistogram import CreateHistogram, CreateHistogram_rg_gb
 
 def miss():
     # ディレクトリ設定
@@ -22,22 +21,13 @@ def miss():
             img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED).astype(np.float32)
             img = img - BLACK_LEVEL
             img = np.clip(img, 0, None)
-            img = img.astype(np.uint16)  # 必要に応じて型を調整
+            img = img.astype(np.uint16)
 
-            # 一時ファイルとして保存
+            # TEMPディレクトリに保存
             temp_path = os.path.join(dirs["TEMP"], f"{filename}.png")
             cv2.imwrite(temp_path, img)
 
-            # ヒストグラム(CSV)を作成し、histディレクトリに保存
-            CreateHistogram(temp_path, dirs["HIST"])
-            # ヒストグラム(numpy)を作成し、hist_rg_gbディレクトリに保存
-            CreateHistogram_rg_gb(temp_path, dirs["HIST_RG_GB"])
-
-            # 一時ファイル削除
-            os.remove(temp_path)
-
-            print(f"Processed histogram for: {image_path}")
-            
+            print(f"Saved to TEMP: {temp_path}")
 
         except Exception as e:
             print(f"エラー: {image_path} の処理中に例外が発生しました: {e}")
