@@ -66,11 +66,17 @@ def main():
         plt.title("Chromaticity: Predicted vs True")
         plt.legend()
         plt.grid(True)
+
+        # 軸の範囲を0〜1に固定（これが追加点）
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+
         plt.tight_layout()
         scatter_path = OUTPUT_DIR / "chromaticity_scatter.png"
         plt.savefig(scatter_path)
         print(f"📁 Saved scatter plot to: {scatter_path}")
         plt.show()
+
 
         # (2) 誤差ヒストグラム（ユークリッド距離）
         errors = np.linalg.norm(y_pred_all - y_true_all, axis=1)
