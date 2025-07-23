@@ -38,12 +38,13 @@ def load_dataset(csv_dir, json_path):
 
         r_ratio = R / total
         g_ratio = G / total
+        b_ratio = B / total
 
-        y_list.append([r_ratio, g_ratio])
+        y_list.append([r_ratio, g_ratio, b_ratio])
 
     # DataFrameに変換
     X = pd.DataFrame(X_list)
-    y = pd.DataFrame(y_list, columns=["r_ratio", "g_ratio"])
+    y = pd.DataFrame(y_list, columns=["r_ratio", "g_ratio", "b_ratio"])
 
 
     return X, y

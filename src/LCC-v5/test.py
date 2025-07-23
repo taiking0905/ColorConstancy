@@ -161,8 +161,5 @@ def main():
     plt.show()
     print(f"📁 Saved angular error scatter plot to: {scatter_angle_path}")
 
-
-
-
 if __name__ == "__main__":
     main()

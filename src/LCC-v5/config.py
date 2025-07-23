@@ -42,7 +42,7 @@ EPOCHS = 1000
 BATCH_SIZE = 16
 LEARNING_RATE =  3e-4
 WEIGHT = 5e-5
-DROPOUT = 0.5
+DROPOUT = 0.3
 
 # -------------------------------
 # 設定パラメータ
