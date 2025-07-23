@@ -11,17 +11,26 @@ num_bins = int(1.0 / bin_width)
 
 def load_and_normalize_image(image_path):
     filename = os.path.splitext(os.path.basename(image_path))[0]
-    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-    black_mask = np.any(img > 0, axis=2)
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED).astype(np.float32)
+
     sum_rgb = np.sum(img, axis=2, keepdims=True) + 1e-6
     rgb_ratio = img / sum_rgb
-    return filename, img, sum_rgb, rgb_ratio, black_mask
+
+    #L2ノルムで正規化（1行ずつのベクトル）
+    l2_norm = np.linalg.norm(img, axis=2, keepdims=True)
+    l2_norm[l2_norm == 0] = 1e-6 
+    rgb_normalized = img / l2_norm 
+
+    black_mask = np.any(img > 0, axis=2)
+    valid_mask = black_mask & (sum_rgb[:, :, 0] > 1e-6)
+
+    return filename, img, rgb_ratio, rgb_normalized, valid_mask
 
 
 # ヒストグラムを作成し表示する関数
 def CreateHistogram(image_path, output_path):
     
-    filename, img, sum_rgb, rgb_ratio, black_mask=load_and_normalize_image(image_path)
+    filename, img, rgb_ratio, _, valid_mask=load_and_normalize_image(image_path)
 
 
     # # 黒以外の領域をマスク（正規化後の値に対応）
@@ -54,7 +63,6 @@ def CreateHistogram(image_path, output_path):
     # ======================
     r_ratio = rgb_ratio[:, :, 2]  # R
     g_ratio = rgb_ratio[:, :, 1]  # G
-    valid_mask = black_mask & (sum_rgb[:, :, 0] > 1e-6)
     r_bins = np.clip((r_ratio[valid_mask] / bin_width).astype(int), 0, num_bins - 1)
     g_bins = np.clip((g_ratio[valid_mask] / bin_width).astype(int), 0, num_bins - 1)
 
@@ -110,15 +118,15 @@ def CreateHistogram(image_path, output_path):
     print(f"Saved 1250-dim histogram for: {filename}")
 
 def CreateHistogram_rg_gb(image_path, output_path):
-    filename, _,sum_rgb, rgb_ratio, black_mask=load_and_normalize_image(image_path)
+    filename, _, rgb_normalized , valid_mask=load_and_normalize_image(image_path)
 
     # ==============================
     # 2D ヒストグラム（rg空間 &gb空間）
     # ==============================
-    r_ratio = rgb_ratio[:, :, 2]  # R
-    g_ratio = rgb_ratio[:, :, 1]  # G
-    b_ratio = rgb_ratio[:, :, 0]  # B
-    valid_mask = black_mask & (sum_rgb[:, :, 0] > 1e-6)
+    
+    r_ratio = rgb_normalized [:, :, 2]  # R
+    g_ratio = rgb_normalized [:, :, 1]  # G
+    b_ratio = rgb_normalized [:, :, 0]  # B
     r_bins = np.clip((r_ratio[valid_mask] / bin_width).astype(int), 0, num_bins - 1)
     g_bins = np.clip((g_ratio[valid_mask] / bin_width).astype(int), 0, num_bins - 1)
     b_bins = np.clip((b_ratio[valid_mask] / bin_width).astype(int), 0, num_bins - 1)
