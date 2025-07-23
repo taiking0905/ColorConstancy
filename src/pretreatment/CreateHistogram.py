@@ -118,7 +118,7 @@ def CreateHistogram(image_path, output_path):
     print(f"Saved 1250-dim histogram for: {filename}")
 
 def CreateHistogram_rg_gb(image_path, output_path):
-    filename, _, rgb_normalized , valid_mask=load_and_normalize_image(image_path)
+    filename, _, _, rgb_normalized , valid_mask=load_and_normalize_image(image_path)
 
     # ==============================
     # 2D ヒストグラム（rg空間 &gb空間）
