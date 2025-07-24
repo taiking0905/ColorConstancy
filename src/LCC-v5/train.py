@@ -1,16 +1,18 @@
 import torch
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-import time  # ←追加
+import time 
+import numpy as np
 
 from load_dataset import load_dataset
 from HistogramDataset import HistogramDataset
 from ResNetModel import ResNetModel, angular_loss, train_one_epoch, evaluate
-from config import get_base_dir, TRAIN_DIR, VAL_DIR, REAL_RGB_JSON_PATH, EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, WEIGHT,ERASE_PROB, ERASE_SIZE, DEVICE, set_seed, ACCUMULATION_STEPS
+from config import get_base_dir, TRAIN_DIR, VAL_DIR, REAL_RGB_JSON_PATH, EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, WEIGHT, SEED, ERASE_PROB, ERASE_SIZE, DEVICE, set_seed, ACCUMULATION_STEPS
 
 
 def main():
-    set_seed() 
+    set_seed(SEED) 
+    rng = np.random.default_rng(SEED)
     base_dir = get_base_dir()
     print("Base dir:", base_dir)
     print(torch.cuda.is_available())  # TrueならOK
@@ -29,12 +31,12 @@ def main():
     print(f"X_val.shape = {X_val.shape}, y_val.shape = {y_val.shape}")
 
     # 3. TensorDataset作成（ここで erase 機能を組み込む）
-    train_dataset = HistogramDataset(X_train, y_train, erase_prob=ERASE_PROB, erase_size = ERASE_SIZE)
-    val_dataset = HistogramDataset(X_val, y_val)
+    train_dataset = HistogramDataset(X_train, y_train, erase_prob=ERASE_PROB, erase_size = ERASE_SIZE,rng=rng)
+    val_dataset = HistogramDataset(X_val, y_val,rng=rng)
 
     # 4. DataLoader作成 pin_memory=Trueこれを使うとGPUへの転送が速くなる
-    train_loader = DataLoader(train_dataset, BATCH_SIZE, shuffle=True, num_workers=8, pin_memory=True, persistent_workers=True)
-    val_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=8, pin_memory=True, persistent_workers=True)
+    train_loader = DataLoader(train_dataset, BATCH_SIZE, shuffle=True, num_workers=0, pin_memory=True, persistent_workers=False)
+    val_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True, persistent_workers=False)
 
 
     # 5. モデル定義

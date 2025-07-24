@@ -93,7 +93,7 @@ def train_one_epoch(model, loader, optimizer, loss_fn, accumulation_steps=1):
 
 # 🔍 評価関数（検証・テスト用）
 def evaluate(model, loader, loss_fn):
-    model.eval()  # 評価モード（DropoutやBatchNormを無効化）
+    model.eval()  
     total_loss = 0.0
 
     with torch.no_grad():  # 勾配を計算しない（推論のみで高速・省メモリ）

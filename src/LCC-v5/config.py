@@ -38,15 +38,16 @@ OUTPUT_DIR = LCC_DIR / "outputs"
 # -------------------------------
 # ハイパーパラメータ
 # -------------------------------
-EPOCHS = 1000
+EPOCHS = 10
 BATCH_SIZE = 16
 LEARNING_RATE =  3e-4
 WEIGHT = 5e-5
-DROPOUT = 0.0
+DROPOUT = 0.3
 
 # -------------------------------
 # 設定パラメータ
 # -------------------------------
+SEED = 42
 OUTPUT_DIM = 3
 ERASE_PROB =0.5
 ERASE_SIZE = 10
@@ -62,9 +63,15 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # -------------------------------
 # ランダムシード固定
 # -------------------------------
-def set_seed(seed=42):
+def set_seed(seed=SEED):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+
+    # 追加: 完全な再現性のための設定
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+

@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 from load_dataset import load_dataset
 from MLPModel import MLPModel, mse_chromaticity_loss, train_one_epoch, evaluate
-from config import TRAIN_DIR,VAL_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, set_seed
+from config import TRAIN_DIR,VAL_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, SEED, set_seed
 
 def main():
-    set_seed() 
+    set_seed(SEED) 
     
 
     # 1. データ読み込み

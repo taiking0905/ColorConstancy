@@ -5,7 +5,7 @@ import numpy as np
 
 from load_dataset import load_dataset
 from MLPModel import MLPModel, mse_chromaticity_loss, evaluate
-from config import TEST_DIR,REAL_RGB_JSON_PATH,OUTPUT_DIR, DEVICE
+from config import TEST_DIR,REAL_RGB_JSON_PATH,OUTPUT_DIR, DEVICE, SEED , set_seed
 
 def compute_angular_errors(y_pred_all, y_true_all):
     # 正規化（念のため）
@@ -19,6 +19,7 @@ def compute_angular_errors(y_pred_all, y_true_all):
     return angles_deg
 
 def main():
+    set_seed(SEED)
     # 1. テストデータの読み込み
     X_test_df, y_test_df = load_dataset(TEST_DIR, REAL_RGB_JSON_PATH)
     X_test = torch.tensor(X_test_df.values, dtype=torch.float32)

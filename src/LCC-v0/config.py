@@ -51,9 +51,14 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # -------------------------------
 # ランダムシード固定
 # -------------------------------
-def set_seed(seed=42):
+SEED = 42
+def set_seed(seed=SEED):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+
+    # 追加: 完全な再現性のための設定
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
