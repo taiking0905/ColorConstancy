@@ -38,7 +38,7 @@ def TeacherProcessing(filename, real_rgb_json, image_path, output_path):
     print(f"Corrected image saved to: {output_path}")
     
     # 表示（matplotlib）→ Enter 押しで閉じる
-    fig, ax = plt.subplots(figsize=(12, 9)) 
+    fig = plt.subplots(figsize=(12, 9)) 
     move_figure(fig, 0, 0) 
     plt.imshow(cv2.cvtColor(img_to_save, cv2.COLOR_BGR2RGB))
     plt.title("Corrected Image - Press Enter to close")

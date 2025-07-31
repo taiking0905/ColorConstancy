@@ -109,7 +109,7 @@ def to_8bit_gamma(img, gamma=2.2):
     12bitまたは16bit画像を8bitに変換して、ガンマ補正も適用（表示用）
     """
     # 正規化（0〜1）
-    img = np.clip((img - BLACK_LEVEL)/ (WHITE_LEVEL - BLACK_LEVEL), 0, 1)
+    img = np.clip((img)/ (WHITE_LEVEL - BLACK_LEVEL), 0, 1)
 
     # ガンマ補正（sRGB風）
     img_gamma = np.power(img, 1 / gamma)
