@@ -80,6 +80,7 @@ def main(png_path: Path, npy_path: Path):
 
     # AsShotNeutral（例）に基づくWB+ガンマ補正
     as_shot_neutral = np.array([2.562066, 0.9945468, 1.6436796], dtype=np.float32)
+    # ここ違う可能性あるぞ
     wb_multipliers = 1.0 / as_shot_neutral
 
     display_rgb = apply_additional_corrections(image_rgb_normalized, wb_multipliers=None, gamma=2.2)

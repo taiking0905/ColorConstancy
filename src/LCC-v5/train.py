@@ -7,7 +7,7 @@ import numpy as np
 from load_dataset import load_dataset
 from HistogramDataset import HistogramDataset
 from ResNetModel import ResNetModel, angular_loss, train_one_epoch, evaluate
-from config import get_base_dir, TRAIN_DIR, VAL_DIR, REAL_RGB_JSON_PATH, EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, WEIGHT, SEED, ERASE_PROB, ERASE_SIZE, DEVICE, set_seed, ACCUMULATION_STEPS
+from config import get_base_dir, TRAIN_DIR, VAL_DIR, REAL_RGB_JSON_PATH, EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, WEIGHT, SEED, ERASE_PROB, ERASE_SIZE, DEVICE, set_seed
 
 
 def main():
@@ -65,7 +65,7 @@ def main():
         # 🔸 Epochの総時間計測開始
         epoch_start_time = time.time()
 
-        train_loss = train_one_epoch(model, train_loader, optimizer, loss_fn, accumulation_steps=ACCUMULATION_STEPS)
+        train_loss = train_one_epoch(model, train_loader, optimizer, loss_fn)
         val_loss = evaluate(model, val_loader, loss_fn)
 
         # 🔹 Epoch総時間

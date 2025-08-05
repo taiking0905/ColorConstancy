@@ -45,12 +45,7 @@ def load_dataset(npy_dir, json_path):
     X = np.stack(X_list)  # shape: (N, 224, 224)
     y = np.array(y_list)  # shape: (N, 3)
 
-    # 🌟 L2ノルムで正規化（1行ずつのベクトル） y_normalized = (R, G, B)/sqrt(R^2 + G^2 + B^2)
-    norm = np.linalg.norm(y, axis=1, keepdims=True)
-    norm[norm == 0] = 1
-    y_normalized = y / norm  # shape: (N, 3)
-
     # DataFrameで返す
-    y_df = pd.DataFrame(y_normalized, columns=["R", "G", "B"])
+    y_df = pd.DataFrame(y, columns=["R", "G", "B"])
 
     return X, y_df

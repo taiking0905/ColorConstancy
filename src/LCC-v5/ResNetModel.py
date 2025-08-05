@@ -55,38 +55,27 @@ def angular_loss(pred, target):
 
 # 🔁 1エポック分の訓練処理
 
-def train_one_epoch(model, loader, optimizer, loss_fn, accumulation_steps=1):
-    # iter_start = time.time()
-    # print(f"⏱️ First iter(loader): {time.time() - iter_start:.3f} sec")
-
+def train_one_epoch(model, loader, optimizer, loss_fn, DEVICE):
     model.train()
     total_loss = 0.0
     optimizer.zero_grad()
 
-    for i, (X_batch, y_batch) in enumerate(loader):
+    for X_batch, y_batch in loader:
         X_batch = X_batch.to(DEVICE)
         y_batch = y_batch.to(DEVICE)
 
-        start_event = torch.cuda.Event(enable_timing=True)
-        end_event = torch.cuda.Event(enable_timing=True)
-
-        start_event.record()
         pred = model(X_batch)
         loss = loss_fn(pred, y_batch)
-        loss = loss / accumulation_steps  # 🔑 勾配スケーリング
 
+        optimizer.zero_grad()
         loss.backward()
-        end_event.record()
+        optimizer.step()
 
-        # ✅ accumulation_steps回ごとにパラメータ更新
-        if (i + 1) % accumulation_steps == 0 or (i + 1) == len(loader):
-            optimizer.step()
-            optimizer.zero_grad()
-
-        total_loss += loss.item() * accumulation_steps
+        total_loss += loss.item()
 
     average_loss = total_loss / len(loader)
     return average_loss
+
 
 
 
