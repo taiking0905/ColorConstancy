@@ -1,35 +1,23 @@
 import torch
 import torch.nn as nn
 
-
 class MLPModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim):
+    def __init__(self, input_dim, hidden1_dim, hidden2_dim, output_dim):
         super().__init__()
-        self.hidden = nn.Linear(input_dim, hidden_dim)
-        self.output = nn.Linear(hidden_dim, output_dim)
-        self.sigmoid = nn.Sigmoid()  # 出力を0〜1に制限
-
+        self.hidden1 = nn.Linear(input_dim, hidden1_dim)
+        self.hidden2 = nn.Linear(hidden1_dim, hidden2_dim)
+        self.output = nn.Linear(hidden2_dim, output_dim)
+        self.sigmoid = nn.Sigmoid()
+    
     def forward(self, x):
-        h = self.hidden(x)  # 隠れ層（線形のみ）
-        out = self.output(h)  # 出力層（線形）
-        out = self.sigmoid(out)  # 0〜1に制限
+        h1 = self.sigmoid(self.hidden1(x))
+        h2 = self.sigmoid(self.hidden2(h1))
+        out = self.sigmoid(self.output(h2)) # 出力層にもシグモイドを適用
         return out
 
 
 def euclidean_loss(pred, target):
     return torch.sqrt(((pred - target) ** 2).sum(dim=1)).mean()
-
-def mse_chromaticity_loss(pred, target, eps=1e-8):
-    # クロマティシティ座標に変換：r = R/(R+G+B), g = G/(R+G+B)
-    pred_sum = pred.sum(dim=1, keepdim=True) + eps
-    target_sum = target.sum(dim=1, keepdim=True) + eps
-
-    pred_chroma = pred[:, :2] / pred_sum  # (r, g)
-    target_chroma = target[:, :2] / target_sum
-
-    # クロマティシティ座標のMSE損失を計算
-    loss = ((pred_chroma - target_chroma) ** 2).mean()
-    return loss
 
 def train_one_epoch(model, loader, optimizer, loss_fn):
     model.train()  # モデルを訓練モードに設定
@@ -58,7 +46,7 @@ def evaluate(model, loader, loss_fn):
             X_batch = X_batch.to(next(model.parameters()).device)  # 追加
             y_batch = y_batch.to(next(model.parameters()).device)  # 追加
             pred = model(X_batch)
-            loss = loss_fn(pred, y_batch)
+            loss = loss_fn(pred, y_batch[:, :2])
             total_loss += loss.item()
 
     average_loss = total_loss / len(loader)

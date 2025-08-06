@@ -1,7 +1,7 @@
 import json
 import os
 import pandas as pd
-import numpy as np
+
 
 def load_dataset(csv_dir, json_path):
     # 1. JSON読み込みと辞書化
@@ -46,8 +46,5 @@ def load_dataset(csv_dir, json_path):
     X = pd.DataFrame(X_list)
     y = pd.DataFrame(y_list, columns=["r_ratio", "g_ratio", "b_ratio"])
 
-    # NumPy配列に変換（学習用など）
-    X_np = X.to_numpy().astype(np.float32)  # shape: (N, 1250)
-    y_np = y.to_numpy().astype(np.float32)  # shape: (N, 3)
 
-    return X_np, y_np
+    return X, y

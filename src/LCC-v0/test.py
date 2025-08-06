@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from load_dataset import load_dataset
-from MLPModel import MLPModel, mse_chromaticity_loss, evaluate
+from MLPModel import MLPModel, euclidean_loss, evaluate
 from config import TEST_DIR, REAL_RGB_JSON_PATH, OUTPUT_DIR, DEVICE, SEED, set_seed
 
 def compute_angular_errors(y_pred_all, y_true_all):
@@ -71,12 +71,12 @@ def main():
     set_seed(SEED)
 
     # 1. テストデータの読み込み
-    X_test_np, y_test_np = load_dataset(TEST_DIR, REAL_RGB_JSON_PATH)
-    X_test = torch.tensor(X_test_np, dtype=torch.float32)
-    y_test = torch.tensor(y_test_np, dtype=torch.float32)
-    
+    X_test_df, y_test_df = load_dataset(TEST_DIR, REAL_RGB_JSON_PATH)
+    X_test = torch.tensor(X_test_df.values, dtype=torch.float32)
+    y_test = torch.tensor(y_test_df[["r_ratio", "g_ratio", "b_ratio"]].values, dtype=torch.float32)
+
     # 2. モデル構造の再定義
-    model = MLPModel(input_dim=X_test.shape[1], hidden_dim=256, output_dim=2)
+    model = MLPModel(input_dim=X_test.shape[1], hidden1_dim=200, hidden2_dim=40, output_dim=2)
     model.load_state_dict(torch.load(OUTPUT_DIR / 'mlp_model.pth', map_location=DEVICE))
     model.to(DEVICE)
     model.eval()
@@ -85,7 +85,7 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
     # 3. 評価実行（クロマティシティMSE）
-    test_loss = evaluate(model, test_loader, mse_chromaticity_loss)
+    test_loss = evaluate(model, test_loader, euclidean_loss)
     print(f"📊 Test Loss = {test_loss:.4f}")
 
     # 4. 予測と実際のRGB値の表示（5件だけ）
