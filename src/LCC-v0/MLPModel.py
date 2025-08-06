@@ -10,7 +10,6 @@ class MLPModel(nn.Module):
         self.sigmoid = nn.Sigmoid()  # 出力を0〜1に制限
 
     def forward(self, x):
-        # 活性化関数は使用せず、線形変換のみ
         h = self.hidden(x)  # 隠れ層（線形のみ）
         out = self.output(h)  # 出力層（線形）
         out = self.sigmoid(out)  # 0〜1に制限

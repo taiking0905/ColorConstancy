@@ -21,16 +21,19 @@ class ResNetModel(nn.Module):
             bias=False
         )
         
-        self.model = model
-
-
-        # 既存のfc層の前にDropoutを挟む構造に変更
-        in_features = self.model.fc.in_features
-        self.model.fc = nn.Sequential(
-            nn.Dropout(p=dropout_rate),          # Dropoutを追加
-            nn.Linear(in_features, output_dim)   # 最終出力
+        # Dropout層を中間に挿入（例: layer3 の後に）
+        model.layer3 = nn.Sequential(
+            model.layer3,
+            nn.Dropout(p=dropout_rate)  # 👈 中間Dropout追加！
         )
 
+        # 最後のfc層にもDropout
+        in_features = model.fc.in_features
+        model.fc = nn.Sequential(
+            nn.Dropout(p=dropout_rate),
+            nn.Linear(in_features, output_dim)
+        )
+        self.model = model
         
     def forward(self, x):
         return self.model(x)  # 順伝播（出力は shape: [batch_size, 3]）
@@ -55,7 +58,7 @@ def angular_loss(pred, target):
 
 # 🔁 1エポック分の訓練処理
 
-def train_one_epoch(model, loader, optimizer, loss_fn, DEVICE):
+def train_one_epoch(model, loader, optimizer, loss_fn):
     model.train()
     total_loss = 0.0
     optimizer.zero_grad()

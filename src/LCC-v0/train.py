@@ -11,14 +11,14 @@ def main():
     
 
     # 1. データ読み込み
-    X_train_df, y_train_df = load_dataset(TRAIN_DIR, REAL_RGB_JSON_PATH)
-    X_val_df, y_val_df = load_dataset(VAL_DIR, REAL_RGB_JSON_PATH)
+    X_train_np, y_train_np = load_dataset(TRAIN_DIR, REAL_RGB_JSON_PATH)
+    X_val_np, y_val_np = load_dataset(VAL_DIR, REAL_RGB_JSON_PATH)
 
     # 2. Tensorに変換
-    X_train = torch.tensor(X_train_df.values, dtype=torch.float32)
-    y_train = torch.tensor(y_train_df[["r_ratio", "g_ratio"]].values, dtype=torch.float32)
-    X_val = torch.tensor(X_val_df.values, dtype=torch.float32)
-    y_val = torch.tensor(y_val_df[["r_ratio", "g_ratio"]].values, dtype=torch.float32)
+    X_train = torch.tensor(X_train_np, dtype=torch.float32)
+    y_train = torch.tensor(y_train_np, dtype=torch.float32)
+    X_val = torch.tensor(X_val_np, dtype=torch.float32)
+    y_val = torch.tensor(y_val_np, dtype=torch.float32)
 
 
     # 3. TensorDataset作成

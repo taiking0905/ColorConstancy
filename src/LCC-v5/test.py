@@ -38,20 +38,6 @@ def visualize_errors(y_pred_all, y_true_all, angular_errors):
     plt.savefig(OUTPUT_DIR / "angular_error_boxplot.png")
     plt.close()
 
-    # (3) RGBベクトル散布図
-    fig = plt.figure(figsize=(6, 6))
-    ax = fig.add_subplot(111, projection='3d')
-    for pred, true in zip(y_pred_all, y_true_all):
-        ax.plot([true[0], pred[0]], [true[1], pred[1]], [true[2], pred[2]], color='gray', alpha=0.5)
-    ax.scatter(y_true_all[:, 0], y_true_all[:, 1], y_true_all[:, 2], color='blue', label='True', alpha=0.6)
-    ax.scatter(y_pred_all[:, 0], y_pred_all[:, 1], y_pred_all[:, 2], color='red', label='Predicted', alpha=0.6)
-    ax.set_xlabel('R'); ax.set_ylabel('G'); ax.set_zlabel('B')
-    ax.set_title("RGB Vector Scatter (True vs Predicted)")
-    ax.legend()
-    plt.tight_layout()
-    plt.savefig(OUTPUT_DIR / "rgb_vector_scatter.png")
-    plt.close()
-
     # (4) サンプルごとの角度誤差
     plt.figure(figsize=(8, 4))
     plt.scatter(np.arange(len(angular_errors)), angular_errors, c='orange', alpha=0.6)
@@ -64,6 +50,23 @@ def visualize_errors(y_pred_all, y_true_all, angular_errors):
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "angular_error_scatter.png")
     plt.close()
+
+def tri_mean(data):
+    """Tri-mean = (Q1 + 2*Q2 + Q3) / 4"""
+    q1 = np.percentile(data, 25)
+    q2 = np.percentile(data, 50)
+    q3 = np.percentile(data, 75)
+    return (q1 + 2*q2 + q3) / 4
+
+def best_25_percent(data):
+    """最も小さい25%の平均"""
+    k = int(len(data) * 0.25)
+    return np.mean(np.sort(data)[:k])
+
+def worst_25_percent(data):
+    """最も大きい25%の平均"""
+    k = int(len(data) * 0.25)
+    return np.mean(np.sort(data)[-k:])
 
 def main():
     set_seed(SEED)
@@ -96,8 +99,13 @@ def main():
         for i in range(min(5, len(X_test))):
             x = torch.tensor(X_test[i], dtype=torch.float32).unsqueeze(0).to(DEVICE)
             pred = model(x)[0].cpu()
-            pred /= torch.sum(pred)
-            print(f"{i+1}: Pred (r, g, b): ({pred[0]:.4f}, {pred[1]:.4f}, {pred[2]:.4f}) | True (r, g, b): ({y_test[i][0]:.4f}, {y_test[i][1]:.4f}, {y_test[i][2]:.4f})")
+            pred /= torch.sum(pred)  # 出力ベクトルを正規化
+
+            y_true = torch.tensor(y_test[i], dtype=torch.float32)
+            y_true /= torch.sum(y_true)  # 🔧 各y_test[i]を個別に正規化
+
+            print(f"{i+1}: Pred (r, g, b): ({pred[0]:.4f}, {pred[1]:.4f}, {pred[2]:.4f}) | True (r, g, b): ({y_true[0]:.4f}, {y_true[1]:.4f}, {y_true[2]:.4f})")
+
 
     # 5. 可視化と統計
     y_pred_all, y_true_all = [], []
@@ -115,9 +123,16 @@ def main():
     visualize_errors(y_pred_all, y_true_all, angular_errors)
 
     print("\n📏 Angular Error Stats (°):")
-    print(f"Mean Angular Error: {np.mean(angular_errors):.4f}°")
-    print(f"Median Angular Error: {np.median(angular_errors):.4f}°")
-    print(f"Max Angular Error: {np.max(angular_errors):.4f}°")
+    print(f"Method\t\tValue")
+    print(f"Mean\t\t{np.mean(angular_errors):.4f}")
+    print(f"Median\t\t{np.median(angular_errors):.4f}")
+    print(f"Tri-m.\t\t{tri_mean(angular_errors):.4f}")
+    print(f"B-25\t\t{best_25_percent(angular_errors):.4f}")
+    print(f"W-25\t\t{worst_25_percent(angular_errors):.4f}")
+    print(f"95-P\t\t{np.percentile(angular_errors, 95):.4f}")
+    print(f"99-P\t\t{np.percentile(angular_errors, 99):.4f}")
+    print(f"Max\t\t{np.max(angular_errors):.4f}")
+
 
 if __name__ == "__main__":
     main()
