@@ -42,7 +42,7 @@ OUTPUT_DIR = LCC_DIR / "outputs"
 EPOCHS = 1000
 BATCH_SIZE = 16
 LEARNING_RATE = 3e-4
-WEIGHT = 0
+WEIGHT = 3e-3
 
 # -------------------------------
 # デバイス設定

@@ -12,9 +12,8 @@ class MLPModel(nn.Module):
     def forward(self, x):
         h1 = self.sigmoid(self.hidden1(x))
         h2 = self.sigmoid(self.hidden2(h1))
-        out = self.sigmoid(self.output(h2)) # 出力層にもシグモイドを適用
+        out = self.sigmoid(self.output(h2)) 
         return out
-
 
 def euclidean_loss(pred, target):
     return torch.sqrt(((pred - target) ** 2).sum(dim=1)).mean()

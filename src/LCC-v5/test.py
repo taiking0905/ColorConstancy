@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import trim_mean
 
 from load_dataset import load_dataset
 from HistogramDataset import HistogramDataset
@@ -51,21 +52,19 @@ def visualize_errors(y_pred_all, y_true_all, angular_errors):
     plt.savefig(OUTPUT_DIR / "angular_error_scatter.png")
     plt.close()
 
-def tri_mean(data):
-    """Tri-mean = (Q1 + 2*Q2 + Q3) / 4"""
-    q1 = np.percentile(data, 25)
-    q2 = np.percentile(data, 50)
-    q3 = np.percentile(data, 75)
-    return (q1 + 2*q2 + q3) / 4
+def tri_mean(data, proportiontocut):
+    # 上下25%をカットして平均を計算
+    tm = trim_mean(data, proportiontocut)
+    return tm
 
-def best_25_percent(data):
+def best_25_percent(data, proportion):
     """最も小さい25%の平均"""
-    k = int(len(data) * 0.25)
+    k = int(len(data) * proportion)
     return np.mean(np.sort(data)[:k])
 
-def worst_25_percent(data):
+def worst_25_percent(data, proportion):
     """最も大きい25%の平均"""
-    k = int(len(data) * 0.25)
+    k = int(len(data) * proportion)
     return np.mean(np.sort(data)[-k:])
 
 def main():
@@ -126,9 +125,9 @@ def main():
     print(f"Method\t\tValue")
     print(f"Mean\t\t{np.mean(angular_errors):.4f}")
     print(f"Median\t\t{np.median(angular_errors):.4f}")
-    print(f"Tri-m.\t\t{tri_mean(angular_errors):.4f}")
-    print(f"B-25\t\t{best_25_percent(angular_errors):.4f}")
-    print(f"W-25\t\t{worst_25_percent(angular_errors):.4f}")
+    print(f"Tri-m.\t\t{tri_mean(angular_errors, 0.25):.4f}")
+    print(f"B-25\t\t{best_25_percent(angular_errors, 0.25):.4f}")
+    print(f"W-25\t\t{worst_25_percent(angular_errors, 0.25):.4f}")
     print(f"95-P\t\t{np.percentile(angular_errors, 95):.4f}")
     print(f"99-P\t\t{np.percentile(angular_errors, 99):.4f}")
     print(f"Max\t\t{np.max(angular_errors):.4f}")
