@@ -3,8 +3,8 @@ from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 
 from load_dataset import load_dataset
-from MLPModel import MLPModel, mse_chromaticity_loss, train_one_epoch, evaluate
-from config import TRAIN_DIR,VAL_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, SEED, set_seed
+from MLPModel import MLPModel, euclidean_loss, train_one_epoch, evaluate
+from config import TRAIN_DIR,VAL_DIR,REAL_RGB_JSON_PATH,EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, DEVICE, SEED, WEIGHT, set_seed
 
 def main():
     set_seed(SEED) 
@@ -30,12 +30,13 @@ def main():
     val_loader = DataLoader(val_dataset, BATCH_SIZE, shuffle=False)
 
     # 5. モデル定義
-    model = MLPModel(input_dim=X_train.shape[1], hidden_dim=256, output_dim=2)
+    model = MLPModel(input_dim=X_train.shape[1], hidden1_dim=200, hidden2_dim=40, output_dim=2)
     model.to(DEVICE)
     # SGDオプティマイザで学習
-    optimizer = torch.optim.SGD(model.parameters(), LEARNING_RATE)
+    # optimizer = torch.optim.SGD(model.parameters(), LEARNING_RATE)
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT)
     # 損失関数はクロマティシティ座標のMSE
-    loss_fn = mse_chromaticity_loss
+    loss_fn = euclidean_loss
 
 
     # 学習記録用リスト
@@ -52,9 +53,6 @@ def main():
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
-    # 7. モデル保存
-    torch.save(model.state_dict(), OUTPUT_DIR / 'mlp_model.pth')
-    plt.savefig(OUTPUT_DIR / 'loss_curve.png')
 
     # 8. 学習曲線の可視化
     plt.plot(train_losses, label='Train Loss')
@@ -64,8 +62,11 @@ def main():
     plt.title('Training and Validation Loss')
     plt.legend()
     plt.grid(True)
+    plt.savefig(OUTPUT_DIR / 'loss_curve.png')
     plt.show()
 
+    # 7. モデル保存
+    torch.save(model.state_dict(), OUTPUT_DIR / 'mlp_model.pth')
 
 if __name__ == "__main__":
     main()

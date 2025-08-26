@@ -7,7 +7,7 @@ import numpy as np
 from load_dataset import load_dataset
 from HistogramDataset import HistogramDataset
 from ResNetModel import ResNetModel, angular_loss, train_one_epoch, evaluate
-from config import get_base_dir, TRAIN_DIR, VAL_DIR, REAL_RGB_JSON_PATH, EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, WEIGHT, SEED, ERASE_PROB, ERASE_SIZE, DEVICE, set_seed, ACCUMULATION_STEPS
+from config import get_base_dir, TRAIN_DIR, VAL_DIR, REAL_RGB_JSON_PATH, EPOCHS, OUTPUT_DIR, BATCH_SIZE, LEARNING_RATE, WEIGHT, SEED, ERASE_PROB, ERASE_SIZE, DEVICE, set_seed
 
 
 def main():
@@ -59,28 +59,24 @@ def main():
 
     all_start_time =time.time()
 
+    # Epochループ
     for epoch in range(EPOCHS):
         print(f"\n==== Epoch {epoch+1}/{EPOCHS} ====")
-
-        # 🔸 Epochの総時間計測開始
         epoch_start_time = time.time()
 
-        train_loss = train_one_epoch(model, train_loader, optimizer, loss_fn, accumulation_steps=ACCUMULATION_STEPS)
+        train_loss = train_one_epoch(model, train_loader, optimizer, loss_fn)
         val_loss = evaluate(model, val_loader, loss_fn)
-
-        # 🔹 Epoch総時間
+        
         epoch_end_time = time.time()
         print(f"Total epoch time: {epoch_end_time - epoch_start_time:.2f} sec")
-
-        # 🔸 ログ保存
         print(f"Loss: Train = {train_loss:.4f}, Val = {val_loss:.4f}")
+
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
 
     # 7. モデル保存
     torch.save(model.state_dict(), OUTPUT_DIR / 'resnet_model.pth')
-    plt.savefig(OUTPUT_DIR / 'loss_curve.png')
 
     all_end_time = time.time()
 
@@ -94,6 +90,7 @@ def main():
     plt.title('Training and Validation Loss')
     plt.legend()
     plt.grid(True)
+    plt.savefig(OUTPUT_DIR / 'loss_curve.png')
     plt.show()
 
 
