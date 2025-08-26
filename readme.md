@@ -1,7 +1,8 @@
-# Color Constancy
+# Color Constancy 
 
 本プロジェクトは、機械学習をして色恒常性を手に入れる研究です。
-
+簡単に色恒常性について学べます。また修正後の画像を見比べることができます
+🔗 https://taiking0905.github.io/ColorConstancy_exhibit/
 ---
 
 ## ✅ 環境構築手順
