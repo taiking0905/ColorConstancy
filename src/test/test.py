@@ -1,48 +1,103 @@
-import rawpy
-import numpy as np
-import cv2
+import rawpy, cv2, numpy as np, os, glob, json
 
-# 入力ファイル（Canon RAWファイル）
-dng_path = './IMG_3891.DNG'
+# === 設定 ===
+dirs = r""
+pattern = "*.dng"  # DNGを直接読む
+# ROIの指定: 画像中央10%をデフォルトに（グレーカードを中央付近に置く想定）
+ROI_FRACTION = 0.1
+SAVE_PNG = True
+JSON_PATH = os.path.join(dirs, "gt_illuminants.json")
 
-with rawpy.imread(dng_path) as raw:
+results = []
+
+dng_paths = sorted(glob.glob(os.path.join(dirs, pattern)))
+for p in dng_paths:
     try:
-        as_shot_neutral = np.array(raw.camera_whitebalance, dtype=np.float32)
-        if as_shot_neutral is None or np.any(as_shot_neutral == 0):
-            raise ValueError
-    except:
-        as_shot_neutral = np.array(raw.daylight_whitebalance, dtype=np.float32)
+        name = os.path.splitext(os.path.basename(p))[0]
+        with rawpy.imread(p) as raw:
+            # 線形RGB（WBなし/ガンマなし/自動明るさなし）
+            rgb16 = raw.postprocess(
+                use_camera_wb=False,
+                no_auto_bright=True,
+                output_bps=16,
+                gamma=(1, 1),
+                demosaic_algorithm=rawpy.DemosaicAlgorithm.AHD
+            )  # HxWx3, uint16, 0..65535（機種により実効レンジは異なる）
 
-    # RGBの最初の3要素だけを使用（4要素ある場合もあるため）
-    as_shot_neutral = as_shot_neutral[:3]
-    as_shot_neutral[as_shot_neutral == 0] = 1e-6  # 0除算対策
+        # ROI（中央）
+        H, W = rgb16.shape[:2]
+        fh = int(H * ROI_FRACTION)
+        fw = int(W * ROI_FRACTION)
+        y0 = (H - fh) // 2
+        x0 = (W - fw) // 2
 
-    wb_multipliers = 1.0 / as_shot_neutral
+        roi = rgb16[y0:y0+fh, x0:x0+fw, :].astype(np.float32)
 
-    print("AsShotNeutral or fallback (used):", as_shot_neutral)
-    print("WB multipliers:", wb_multipliers)
+        # クリップ/暗部の除外マスク（上位2%・下位1%を除外の例）
+        maxv = roi.max()
+        high_th = maxv * 0.98
+        low_th  = maxv * 0.01
+        mask = (roi[:,:,0] < high_th) & (roi[:,:,1] < high_th) & (roi[:,:,2] < high_th) & \
+               (roi[:,:,0] > low_th)  & (roi[:,:,1] > low_th)  & (roi[:,:,2] > low_th)
+
+        # マスクがスカスカならROIをそのまま使う（保険）
+        if mask.sum() < roi.shape[0]*roi.shape[1]*0.2:
+            mask = np.ones(roi.shape[:2], dtype=bool)
+
+        Rm = roi[:,:,0][mask].mean()
+        Gm = roi[:,:,1][mask].mean()
+        Bm = roi[:,:,2][mask].mean()
+
+        # 照明ベクトル（グレーカードは等反射と仮定）
+        e = np.array([Rm, Gm, Bm], dtype=np.float32)
+
+        # Gで正規化（学習で扱いやすい）
+        if Gm <= 1e-6:
+            e_norm = e / (np.linalg.norm(e) + 1e-6)  # 代替: L2正規化
+            norm_type = "L2"
+        else:
+            e_norm = e / Gm
+            norm_type = "G-norm"
+
+        # WB係数（モデルによってはこちらを正解にすることも）
+        # 「e_norm * wb = [1,1,1]」になるように wb = 1 / e_norm
+        wb = 1.0 / np.maximum(e_norm, 1e-6)
+
+        # 出力PNG（任意）
+        if SAVE_PNG:
+            out_png = os.path.join(dirs, f"{name}_linear.png")
+            cv2.imwrite(out_png, cv2.cvtColor(rgb16, cv2.COLOR_RGB2BGR))
+
+            # 12bit画像も保存
+            white_level = 4095
+            black_level = 528
+            rgb_12bit = ((rgb16.astype(np.float32) - black_level) / (white_level - black_level) * 4095).clip(0, 4095).astype(np.uint16)
+            out_png_12bit = os.path.join(dirs, f"{name}_linear_12bit.png")
+            cv2.imwrite(out_png_12bit, cv2.cvtColor(rgb_12bit, cv2.COLOR_RGB2BGR))
 
 
-with rawpy.imread(dng_path) as raw:
-    # デモザイク後のRGBを16bitで取得（ホワイトバランスなし・ガンマ補正なし）
-    rgb = raw.postprocess(
-        use_camera_wb=False,       # ホワイトバランス無効
-        no_auto_bright=True,       # 自動明るさ調整オフ
-        output_bps=16,             # 16bit出力
-        gamma=(1, 1),              # ガンマ補正なし（リニア）
-        demosaic_algorithm=rawpy.DemosaicAlgorithm.AHD  # デモザイクあり（AHDなど）
-    )
+        # ログ保持
+        rec = {
+            "filename": os.path.basename(p),
+            "norm_type": norm_type,
+            "e_norm_r": float(e_norm[0]),
+            "e_norm_g": float(e_norm[1]),
+            "e_norm_b": float(e_norm[2]),
+            "wb_r": float(wb[0]),
+            "wb_g": float(wb[1]),
+            "wb_b": float(wb[2]),
+            "roi_xywh": [int(x0), int(y0), int(fw), int(fh)]
+        }
+        results.append(rec)
+        print(f"[OK] {name}: e_norm={e_norm}, wb={wb}")
 
-    # データの最大値（RAWセンサーの白レベル）を取得
-    white_level = raw.white_level
-    black_level = raw.black_level_per_channel[0]  # 通常全チャンネル同じ
-    print("white_level:", white_level, "black_level", black_level)
+    except Exception as ex:
+        print(f"[ERR] {p}: {ex}")
 
-    # black level 補正
-    # rgb = np.clip(rgb.astype(np.float32) - black_level, 0, white_level - black_level)
+# 保存（JSON）
 
-    # 12bitに正規化（値域0〜4095へスケーリング）
-    rgb_12bit = (rgb / (white_level - black_level) * 4095).astype(np.uint16)
+with open(JSON_PATH, "w", encoding="utf-8") as f:
+    json.dump(results, f, ensure_ascii=False, indent=2)
 
-    # 保存（16bit PNG、値域は0〜4095の12bit相当）
-    cv2.imwrite("IMG_3891.png", cv2.cvtColor(rgb_12bit, cv2.COLOR_RGB2BGR))
+print(f"Saved: {CSV_PATH}")
+print(f"Saved: {JSON_PATH}")

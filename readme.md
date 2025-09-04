@@ -17,8 +17,8 @@ python -m venv ColorConstancy_env
 .\ColorConstancy_env\Scripts\Activate   
 
 pip install -r requirements.txt
-
-```"E:\ColorConstancy\histogram"
+"E:\ColorConstancy\histogram"
+```
 
 ## 🔧 インストール手順（GPU対応）
 
@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
-
+```
 
 ```bash
 
@@ -58,8 +58,7 @@ USB/ColorConstancy
 ├── /enddatasets
 └── 
 ````
---- 
-進捗報告:   
-https://field-motorcycle-315.notion.site/2492c8c0fa7c8083a14ff4999e612917
+
+進捗報告:https://field-motorcycle-315.notion.site/2492c8c0fa7c8083a14ff4999e612917
 
 ---
