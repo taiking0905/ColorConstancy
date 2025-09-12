@@ -31,7 +31,8 @@ for dng_path in dng_files:
                 no_auto_bright=True,
                 output_bps=16,
                 gamma=(1, 1),
-                demosaic_algorithm=rawpy.DemosaicAlgorithm.AHD
+                demosaic_algorithm=rawpy.DemosaicAlgorithm.AHD,
+                output_color=rawpy.ColorSpace.raw
             )
 
             # データの最大値（RAWセンサーの白レベル）を取得
