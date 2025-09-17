@@ -29,10 +29,11 @@ for dng_path in dng_files:
             rgb = raw.postprocess(
                 use_camera_wb=False,
                 no_auto_bright=True,
+                no_auto_scale=True,
                 output_bps=16,
                 gamma=(1, 1),
                 demosaic_algorithm=rawpy.DemosaicAlgorithm.AHD,
-                output_color=rawpy.ColorSpace.raw
+                output_color=rawpy.ColorSpace.XYZ
             )
 
             # データの最大値（RAWセンサーの白レベル）を取得
