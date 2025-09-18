@@ -33,13 +33,15 @@ for dng_path in dng_files:
                 output_bps=16,
                 gamma=(1, 1),
                 demosaic_algorithm=rawpy.DemosaicAlgorithm.AHD,
-                output_color=rawpy.ColorSpace.XYZ
+                #学習用はRAW,評価用はXYZ
+                output_color=rawpy.ColorSpace.raw
             )
 
             # データの最大値（RAWセンサーの白レベル）を取得
             white_level = raw.white_level
             black_level = raw.black_level_per_channel[0]
-
+            raw_image = raw.raw_image.copy()  
+            min_val = raw_image.min()
 
             # 保存ファイル名（拡張子をPNGに変更）
             filename = os.path.splitext(os.path.basename(dng_path))[0] + ".png"
@@ -53,6 +55,7 @@ for dng_path in dng_files:
             print("  AsShotNeutral:", as_shot_neutral)
             print("  WB multipliers:", wb_multipliers)
             print("  white_level:", white_level, "black_level:", black_level)
+            print("  RAW最小値:", min_val)
             print(f"  保存しました: {save_path}")
 
     except Exception as e:
