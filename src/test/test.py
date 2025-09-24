@@ -3,12 +3,14 @@ import numpy as np
 import cv2
 import glob
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 # DNGファイルが入っているディレクトリ
-dirs = r"C:/Users/taiki/Desktop/ColorConstancy_data"
+TEST_IPHONE_PATH = os.getenv("TEST_IPHONE_PATH")
 
 # ディレクトリ内のすべてのDNGファイルを取得
-dng_files = glob.glob(os.path.join(dirs, "*.DNG"))
+dng_files = glob.glob(os.path.join(TEST_IPHONE_PATH, "*.DNG"))
 
 for dng_path in dng_files:
     try:
@@ -45,7 +47,7 @@ for dng_path in dng_files:
 
             # 保存ファイル名（拡張子をPNGに変更）
             filename = os.path.splitext(os.path.basename(dng_path))[0] + ".png"
-            save_path = os.path.join(dirs, filename)
+            save_path = os.path.join(TEST_IPHONE_PATH, filename)
 
             # PNGとして保存
             cv2.imwrite(save_path, cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))
