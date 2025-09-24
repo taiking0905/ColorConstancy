@@ -42,7 +42,7 @@ def get_base_dir():
 BASE_PATH = get_base_dir()
 
 # カメラ設定（black/whiteレベル）
-BLACK_LEVEL = 0
+BLACK_LEVEL = 528
 WHITE_LEVEL = 4095
 
 # ======== ディレクトリ構成 ========

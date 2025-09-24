@@ -34,6 +34,7 @@ TRAIN_DIR = BASE_DIR / "train"
 VAL_DIR = BASE_DIR / "val"
 REAL_RGB_JSON_PATH = (BASE_DIR / "..") / "real_rgb.json"
 TEST_DIR = BASE_DIR / "test"
+IPHONE_TEST_DIR = BASE_DIR / "iphone_test"
 OUTPUT_DIR = LCC_DIR / "outputs"
 # -------------------------------
 # ハイパーパラメータ

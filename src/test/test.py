@@ -5,7 +5,7 @@ import glob
 import os
 
 # DNGファイルが入っているディレクトリ
-dirs = r"C:/Users/taiki/Desktop/test"
+dirs = r"C:/Users/taiki/Desktop/ColorConstancy_data"
 
 # ディレクトリ内のすべてのDNGファイルを取得
 dng_files = glob.glob(os.path.join(dirs, "*.DNG"))
