@@ -38,10 +38,10 @@ class DNGHandler(FileSystemEventHandler):
     def on_created(self, event):
         if event.src_path.lower().endswith(".dng"):
             print(f"新規ファイル検知: {event.src_path}")
+            time.sleep(5)
             self.process_dng(event.src_path)
 
 if __name__ == "__main__":
-    print({OneDrive_PNG_PATH})
     event_handler = DNGHandler()
     observer = Observer()
     observer.schedule(event_handler, OneDrive_DATA_PATH, recursive=False)
