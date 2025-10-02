@@ -18,7 +18,7 @@ Onedrive_TRASH_BOX_PATH = os.getenv("Onedrive_TRASH_BOX_PATH")
 BLACK_LEVEL = 528
 WHITE_LEVEL = 4095
 
-def to_8bit_gamma(img, gamma=2.2):
+def to_8bit_gamma(img, gamma=1):
     """
     12bitまたは16bit画像を8bitに変換して、ガンマ補正も適用（表示用）
     """
@@ -53,7 +53,7 @@ class DNGHandler(FileSystemEventHandler):
                     print(f"保存失敗: {save_path_raw} （フォルダ存在しない可能性あり）")
                 
                 # ② 8bit化＋ガンマ補正画像を保存
-                rgb_gamma = to_8bit_gamma(rgb_raw, gamma=2.2)
+                rgb_gamma = to_8bit_gamma(rgb_raw, gamma=1)
                 filename_gamma = os.path.splitext(os.path.basename(dng_path))[0] + "_gamma.jpg"
                 save_path_gamma = os.path.join(OneDrive_GANMA_PNG_PATH, filename_gamma)
                 success_gamma = cv2.imwrite(save_path_gamma, cv2.cvtColor(rgb_gamma, cv2.COLOR_RGB2BGR), [int(cv2.IMWRITE_JPEG_QUALITY), 95])
