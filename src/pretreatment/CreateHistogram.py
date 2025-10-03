@@ -167,7 +167,7 @@ def CreateHistogram_rg_gb(image_path, output_path):
     else:
         presence_gb = hist_gb_2d.astype(np.float32)
 
-
+    # INTER_LINEARよりもINTER_NEARESTのほうがいいかも
     upsampled_rg = cv2.resize(presence_rg, (224, 224), interpolation=cv2.INTER_LINEAR)
     upsampled_gb = cv2.resize(presence_gb, (224, 224), interpolation=cv2.INTER_LINEAR)
 

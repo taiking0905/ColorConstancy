@@ -42,7 +42,7 @@ def get_base_dir():
 BASE_PATH = get_base_dir()
 
 # カメラ設定（black/whiteレベル）
-BLACK_LEVEL = 528
+BLACK_LEVEL = 0
 WHITE_LEVEL = 4095
 
 # ======== ディレクトリ構成 ========
@@ -104,7 +104,7 @@ def move_figure(fig, x: int, y: int):
         fig.canvas.manager.window.move(x, y)
 
 
-def to_8bit_gamma(img, gamma=2.2):
+def to_8bit_gamma(img, gamma=3):
     """
     12bitまたは16bit画像を8bitに変換して、ガンマ補正も適用（表示用）
     """

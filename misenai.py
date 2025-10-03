@@ -3,7 +3,7 @@ import cv2
 import os
 
 BLACK_LEVEL = 0
-WHITE_LEVEL = 255  # PNG確認用なら255に
+WHITE_LEVEL = 4095  # PNG確認用なら255に
 
 def to_8bit_gamma(img, gamma=1):
     img = np.clip((img - BLACK_LEVEL) / (WHITE_LEVEL - BLACK_LEVEL), 0, 1)
@@ -20,7 +20,7 @@ def png_to_jpeg(png_path, jpeg_path=None, quality=95):
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     # 8bit + ガンマ補正
-    rgb_gamma = to_8bit_gamma(img, gamma=0.9)
+    rgb_gamma = to_8bit_gamma(img, gamma=2.2)
 
     if jpeg_path is None:
         jpeg_path = os.path.splitext(png_path)[0] + ".jpeg"
@@ -33,6 +33,6 @@ def png_to_jpeg(png_path, jpeg_path=None, quality=95):
     return jpeg_path
 
 # 使用例
-png_file = r"E:\ColorConstancy\enddatasets\8D5U5524.png"
-jpeg_file = r"E:\8D5U5524.jpeg"
+png_file = r"C:\Users\taiki\OneDrive_SuwaTokyoUniversityOfScience\LearningColorConstancy_IPhone\LearningColorConstancy_rawpng\IMG_4027.png"
+jpeg_file = r"E:\IMG_4027.jpeg"
 png_to_jpeg(png_file, jpeg_file, quality=95)
