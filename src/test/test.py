@@ -46,3 +46,6 @@ with rawpy.imread(dng_path) as raw:
 
     # 保存（16bit PNG、値域は0〜4095の12bit相当）
     cv2.imwrite("IMG_3891.png", cv2.cvtColor(rgb_12bit, cv2.COLOR_RGB2BGR))
+
+
+#test
